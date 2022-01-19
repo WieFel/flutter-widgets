@@ -1,3 +1,6 @@
+import 'dart:math';
+
+import 'package:charts_example/trackball_behavior.dart';
 import 'package:flutter/material.dart';
 import 'package:syncfusion_flutter_charts/charts.dart';
 import 'package:syncfusion_flutter_charts/sparkcharts.dart';
@@ -32,6 +35,7 @@ class _MyHomePageState extends State<_MyHomePage> {
     _SalesData('Apr', 32),
     _SalesData('May', 40)
   ];
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -42,20 +46,36 @@ class _MyHomePageState extends State<_MyHomePage> {
           //Initialize the chart widget
           SfCartesianChart(
               primaryXAxis: CategoryAxis(),
+              primaryYAxis: NumericAxis(name: "y0"),
+              axes: [
+                NumericAxis(name: "y1"),
+              ],
               // Chart title
               title: ChartTitle(text: 'Half yearly sales analysis'),
               // Enable legend
-              legend: Legend(isVisible: true),
+              legend: Legend(isVisible: true, position: LegendPosition.bottom),
               // Enable tooltip
-              tooltipBehavior: TooltipBehavior(enable: true),
+              trackballBehavior: LynusTrackballBehavior(
+                tooltipTimeFormat: "dd.MM.yyyy HH:mm",
+              ),
               series: <ChartSeries<_SalesData, String>>[
                 LineSeries<_SalesData, String>(
                     dataSource: data,
                     xValueMapper: (_SalesData sales, _) => sales.year,
                     yValueMapper: (_SalesData sales, _) => sales.sales,
-                    name: 'Sales',
+                    name: 'Sales sales sales sales',
+                    yAxisName: "y0",
                     // Enable data label
-                    dataLabelSettings: DataLabelSettings(isVisible: true))
+                    dataLabelSettings: DataLabelSettings(isVisible: true)),
+                LineSeries<_SalesData, String>(
+                    dataSource: data,
+                    xValueMapper: (_SalesData sales, _) => sales.year,
+                    yValueMapper: (_SalesData sales, _) =>
+                        sales.sales * Random(123).nextInt(100),
+                    name: 'Blabla blabla blabla blabla',
+                    yAxisName: "y1",
+                    // Enable data label
+                    dataLabelSettings: DataLabelSettings(isVisible: true)),
               ]),
           Expanded(
             child: Padding(
