@@ -32,5 +32,6 @@ class LynusTrackballBehavior extends TrackballBehavior {
           //     CustomPaint(
           //   painter: CustomPainterTooltip(),
           // ),
+          includeYAxisExceedingPoints: true,
         );
 }
