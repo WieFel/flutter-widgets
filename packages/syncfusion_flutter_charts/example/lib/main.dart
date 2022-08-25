@@ -184,12 +184,16 @@ class _MyHomePageState extends State<_MyHomePage> {
           padding: const EdgeInsets.all(16.0),
           child: SfCartesianChart(
               primaryXAxis: DateTimeAxis(
+                desiredIntervals: 6,
+                maximumLabels: 3,
+                majorGridLines: const MajorGridLines(width: 0),
                 minimum: DateTime.fromMillisecondsSinceEpoch(1661378400 * 1000),
                 visibleMinimum:
                     DateTime.fromMillisecondsSinceEpoch(1661378400 * 1000),
                 maximum: DateTime.fromMillisecondsSinceEpoch(1661464800 * 1000),
                 visibleMaximum:
                     DateTime.fromMillisecondsSinceEpoch(1661464800 * 1000),
+                labelIntersectAction: AxisLabelIntersectAction.rotate90,
               ),
               primaryYAxis: NumericAxis(name: "y0"),
               // Chart title
@@ -201,7 +205,7 @@ class _MyHomePageState extends State<_MyHomePage> {
                 tooltipTimeFormat: "dd.MM.yyyy HH:mm",
               ),
               series: <ChartSeries<LynusPoint, DateTime>>[
-                LineSeries<LynusPoint, DateTime>(
+                FastLineSeries<LynusPoint, DateTime>(
                   dataSource: data,
                   xValueMapper: (LynusPoint data, _) =>
                       DateTime.fromMillisecondsSinceEpoch(
