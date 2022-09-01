@@ -1,6 +1,8 @@
-import 'package:charts_example/trackball_behavior.dart';
 import 'package:flutter/material.dart';
 import 'package:syncfusion_flutter_charts/charts.dart';
+
+import 'charts/trackball_behavior.dart';
+import 'model/chart/lynus_point.dart';
 
 void main() {
   return runApp(_ChartApp());
@@ -362,12 +364,4 @@ class _MyHomePageState extends State<_MyHomePage> {
               ]),
         ));
   }
-}
-
-/// A representation of a point in the chart data.
-class LynusPoint {
-  num x;
-  num? y;
-
-  LynusPoint(this.x, this.y);
 }

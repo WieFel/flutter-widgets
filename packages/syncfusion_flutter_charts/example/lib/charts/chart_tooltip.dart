@@ -1,7 +1,8 @@
-import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:syncfusion_flutter_charts/charts.dart';
+
+import '../utils.dart';
 
 class ChartTooltip extends StatelessWidget {
   final TrackballDetails trackballDetails;
@@ -119,7 +120,7 @@ class ChartTooltipItem extends StatelessWidget {
         ),
         const SizedBox(width: 4),
         Text(
-          "${yValue.toStringAsFixed(2)}",
+          "${yValue}",
           style: TextStyle(
             fontWeight: FontWeight.bold,
             color: color,
@@ -129,10 +130,3 @@ class ChartTooltipItem extends StatelessWidget {
     );
   }
 }
-
-/// Returns the index with the maximum element of the list.
-int argmax(List<num> list) => list
-    .mapIndexed((i, e) => [i, e])
-    .reduce((r, current) => current[1] > r[1] ? current : r)
-    .first
-    .toInt();

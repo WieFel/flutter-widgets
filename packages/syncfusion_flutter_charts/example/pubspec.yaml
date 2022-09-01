@@ -11,7 +11,13 @@ dependencies:
     sdk: flutter
   syncfusion_flutter_charts: 
     path: ../
-  cupertino_icons: ^1.0.2
+  vs_scrollbar: ^0.2.1
+  lynus_mobile_core:
+    git:
+      url: git@github.com:lynus-io/mobile_core.git
+      ref: 1d42450f6b0dae0812ac0d9e76910aafe2e42453
+  expressions: ^0.2.3
+  tinycolor2: ^2.0.0
 
 flutter:
 
