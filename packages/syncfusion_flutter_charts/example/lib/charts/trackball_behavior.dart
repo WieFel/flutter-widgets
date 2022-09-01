@@ -24,7 +24,6 @@ class LynusTrackballBehavior extends TrackballBehavior {
           tooltipAlignment: ChartAlignment.near,
           builder: (BuildContext context, TrackballDetails trackballDetails) =>
               ChartTooltip(
-            key: UniqueKey(),
             trackballDetails: trackballDetails,
             tooltipTimeFormat: tooltipTimeFormat,
           ),

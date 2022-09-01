@@ -1,7 +1,10 @@
+import 'package:charts_example/charts/chart_bounds.dart';
+import 'package:charts_example/charts/lynus_chart.dart';
+import 'package:charts_example/model/chart/chart_data.dart';
 import 'package:flutter/material.dart';
-import 'package:syncfusion_flutter_charts/charts.dart';
+import 'package:lynus_mobile_core/model/device.dart';
 
-import 'charts/trackball_behavior.dart';
+import 'charts/chart_periods.dart';
 import 'model/chart/lynus_point.dart';
 
 void main() {
@@ -327,41 +330,32 @@ class _MyHomePageState extends State<_MyHomePage> {
         ),
         body: Padding(
           padding: const EdgeInsets.all(16.0),
-          child: SfCartesianChart(
-              primaryXAxis: DateTimeAxis(
-                desiredIntervals: 6,
-                maximumLabels: 3,
-                majorGridLines: const MajorGridLines(width: 0),
-                minimum: DateTime.fromMillisecondsSinceEpoch(
-                    data.first.x.toInt() * 1000),
-                visibleMinimum: DateTime.fromMillisecondsSinceEpoch(
-                    data.first.x.toInt() * 1000),
-                maximum: DateTime.fromMillisecondsSinceEpoch(
-                    data.last.x.toInt() * 1000),
-                visibleMaximum: DateTime.fromMillisecondsSinceEpoch(
-                    data.last.x.toInt() * 1000),
-                labelIntersectAction: AxisLabelIntersectAction.rotate90,
-              ),
-              primaryYAxis: NumericAxis(name: "y0"),
-              // Chart title
-              title: ChartTitle(text: 'Title'),
-              // Enable legend
-              legend: Legend(isVisible: true, position: LegendPosition.bottom),
-              // Enable tooltip
-              trackballBehavior: LynusTrackballBehavior(
-                tooltipTimeFormat: "HH:mm",
-              ),
-              series: <ChartSeries<LynusPoint, DateTime>>[
-                FastLineSeries<LynusPoint, DateTime>(
-                  dataSource: data,
-                  xValueMapper: (LynusPoint data, _) =>
-                      DateTime.fromMillisecondsSinceEpoch(
-                          data.x.toInt() * 1000),
-                  yValueMapper: (LynusPoint sales, _) => sales.y,
-                  name: 'Test',
-                  yAxisName: "y0",
+          child: LynusChart(
+            title: "Test chart",
+            data: ChartData(
+              period: Period.day,
+              chartOptions: [
+                ChartOption(
+                  name: "test",
+                  scaling: Scaling(),
+                  seriesType: "View",
+                  type: "line",
+                  unit: "test",
+                  agg: "last",
+                  chartOptionVar: "1",
                 ),
-              ]),
+              ],
+              shownSeries: [0],
+              chartBounds: ChartBounds(
+                start: data.first.x.toInt(),
+                end: data.last.x.toInt(),
+                endChart: data.last.x.toInt(),
+              ),
+              stackingOptions: "normal",
+              showY: true,
+              data: [data],
+            ),
+          ),
         ));
   }
 }
