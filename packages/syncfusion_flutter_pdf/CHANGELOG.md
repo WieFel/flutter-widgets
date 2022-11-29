@@ -1,33 +1,86 @@
-## [19.3.55-beta] - 11/23/2021 
+## [20.2.48] - 09/06/2022
 
 **Bugs**
 
-* Exception will no longer been thrown while extracting text from particular PDF document.
+* The type casting issue when trying to get annotation is now resolved.
 
-## [19.3.48-beta] - 11/02/2021 
+## [20.2.45] - 08/23/2022
 
 **Bugs**
 
-* Emoji characters preservation issue has been resolved now.
+* The font is not updated properly for loaded form fields is now resolved.
 
-* Null check exception will no longer been thrown while removing password from PDF document.
+## [20.2.36] - 06/30/2022
 
-## [19.3.47-beta] - 10/26/2021 
+**Breaking changes**
+
+* The `save` method has been changed to an asynchronous type in the `PdfDocument` and the `saveSync` method has been added for synchronous.
 
 **Features**
 
-* Provided the support to identify whether the TextGlyph is rotated or not.
-
-## [19.3.46-beta] - 10/19/2021 
-**Bugs**
-
-* The text search bounds related issue has been resolved now.
-
-## [19.3.45-beta] - 10/12/2021 
+* Provided asynchronous save support for PDF documents.
 
 **Bugs**
 
-* PDF destination retrieval related issue has been resolved now.
+* The preservation issue when flattening the PDF text box field is now resolved.
+
+* Resolved the document corruption issue while modifying encrypted PDF document.
+
+## [20.1.48-beta] - 04/12/2022
+
+**Bugs**
+
+* The layout issue when extracting text from the PDF document is now resolved.
+
+## [20.1.47-beta] - 04/04/2022
+
+**Features**
+
+* Provided support to extract RTL text from an existing PDF document along with its bounds.
+
+* Provided support to find RTL text in an existing PDF document.
+
+**Known Limitation**
+
+* Combination of RTL and LTR text in find operations will not work. For example "80٪ خصم في المحدد jeans".
+
+## [19.4.41-beta] - 01/04/2022
+
+**Bugs**
+
+* Typecasting exceptions will no longer occur while extracting text from the PDF document.
+
+## [19.3.55-beta] - 11/23/2021
+
+**Bugs**
+
+* Exception will no longer be thrown while extracting text from a particular PDF document.
+
+## [19.3.48-beta] - 11/02/2021
+
+**Bugs**
+
+* Emoji character preservation issue has been resolved now.
+
+* Null check exception will no longer be thrown while removing the password from a PDF document.
+
+## [19.3.47-beta] - 10/26/2021
+
+**Features**
+
+* Provided support to identify whether the TextGlyph is rotated or not.
+
+## [19.3.46-beta] - 10/19/2021
+
+**Bugs**
+
+* The text search bounds related issue has now been resolved.
+
+## [19.3.45-beta] - 10/12/2021
+
+**Bugs**
+
+* The PDF destination retrieval related issue has now been resolved.
 
 ## [19.2.56-beta.1] - 08/17/2021
 

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart' hide SelectionChangedCallback;
 import 'package:flutter/rendering.dart';
+import 'package:syncfusion_flutter_core/localizations.dart';
 import 'package:syncfusion_flutter_core/theme.dart';
 
 import '../runtime/cell_renderers.dart';
@@ -57,6 +58,9 @@ class DataGridConfiguration {
 
   /// The [ColumnResizeController] used to control the column resizing operations.
   late ColumnResizeController columnResizeController;
+
+  /// Provides the base functionalities to process the filtering in [SfDataGrid].
+  late DataGridFilterHelper dataGridFilterHelper;
 
   /// The width of the current datagrid view.
   late double viewWidth;
@@ -186,6 +190,17 @@ class DataGridConfiguration {
   ///Defaults to false
   bool shrinkWrapColumns = false;
 
+  /// Decides whether the UI filtering should be enabled for all the columns.
+  ///
+  /// [GridColumn.allowFiltering] has the highest priority over this property.
+  bool allowFiltering = false;
+
+  /// Called when the filtering is being applied through UI filtering.
+  DataGridFilterChangingCallback? onFilterChanging;
+
+  /// Called after the UI filtering is applied to [SfDataGrid].
+  DataGridFilterChangedCallback? onFilterChanged;
+
   /// Contains all the properties of the checkbox column.
   DataGridCheckboxColumnSettings checkboxColumnSettings =
       const DataGridCheckboxColumnSettings();
@@ -266,6 +281,10 @@ class DataGridConfiguration {
   /// this class to configure a [SfDataGridTheme] widget.
   DataGridThemeHelper? dataGridThemeHelper;
 
+  /// Instance of a [SfLocalizations] class that provide the localized resource
+  /// values to the UI filtering lables.
+  late SfLocalizations localizations;
+
   /// Controls a vertical scrolling in DataGrid.
   ScrollController? verticalScrollController;
 
@@ -311,11 +330,11 @@ class DataGridConfiguration {
   /// twice in quick succession.
   DataGridCellDoubleTapCallback? onCellDoubleTap;
 
-  /// Called when a long press gesture with a primary button has been
-  /// recognized for a cell.
+  /// Called when a tap with a cell has occurred with a secondary button.
   DataGridCellTapCallback? onCellSecondaryTap;
 
-  /// Called when a tap with a cell has occurred with a secondary button.
+  /// Called when a long press gesture with a primary button has been
+  /// recognized for a cell.
   DataGridCellLongPressCallback? onCellLongPress;
 
   /// A builder that sets the widget to display at the bottom of the datagrid
@@ -339,4 +358,12 @@ class DataGridConfiguration {
   /// An instance of a [ThemeData.colorScheme] that can be used to configure the
   /// color properties in the [SfDataGrid].
   ColorScheme? colorScheme;
+
+  /// Decides whether the Vertical ScrollController can be disposed of in the source itself.
+  /// Default to true.
+  bool disposeVerticalScrollController = true;
+
+  /// Decides whether the Horizontal ScrollController can be disposed of in the source itself.
+  /// Default to true.
+  bool disposeHorizontalScrollController = true;
 }

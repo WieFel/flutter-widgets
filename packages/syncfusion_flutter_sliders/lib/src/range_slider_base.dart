@@ -38,6 +38,7 @@ abstract class RenderBaseRangeSlider extends RenderBaseSlider
     required bool enableIntervalSelection,
     required SliderDragMode dragMode,
     required LabelPlacement labelPlacement,
+    required EdgeLabelPlacement edgeLabelPlacement,
     required NumberFormat numberFormat,
     required DateFormat? dateFormat,
     required DateIntervalType? dateIntervalType,
@@ -72,6 +73,7 @@ abstract class RenderBaseRangeSlider extends RenderBaseSlider
             enableTooltip: enableTooltip,
             shouldAlwaysShowTooltip: shouldAlwaysShowTooltip,
             labelPlacement: labelPlacement,
+            edgeLabelPlacement: edgeLabelPlacement,
             numberFormat: numberFormat,
             dateFormat: dateFormat,
             dateIntervalType: dateIntervalType,
@@ -258,9 +260,13 @@ abstract class RenderBaseRangeSlider extends RenderBaseSlider
     endPositionController.value = getFactorFromValue(actualValues.end);
   }
 
-  double get minThumbGap => sliderType == SliderType.horizontal
-      ? (actualMax - actualMin) * (8 / actualTrackRect.width).clamp(0.0, 1.0)
-      : (actualMax - actualMin) * (8 / actualTrackRect.height).clamp(0.0, 1.0);
+  double get minThumbGap => isDiscrete
+      ? 0
+      : sliderType == SliderType.horizontal
+          ? (actualMax - actualMin) *
+              (8 / actualTrackRect.width).clamp(0.0, 1.0)
+          : (actualMax - actualMin) *
+              (8 / actualTrackRect.height).clamp(0.0, 1.0);
 
   SfRangeValues get actualValues =>
       isDateTime ? _valuesInMilliseconds : _values;
@@ -390,6 +396,10 @@ abstract class RenderBaseRangeSlider extends RenderBaseSlider
       _newValues = _values;
       return;
     } else if (rightThumbWidth == leftThumbWidth) {
+      if (activeThumb == null) {
+        _setActiveThumb();
+      }
+
       switch (activeThumb!) {
         case SfThumb.start:
           overlayStartController.forward();
@@ -748,15 +758,7 @@ abstract class RenderBaseRangeSlider extends RenderBaseSlider
       // [activeThumb] to [SfThumb.end] when start, end and min values are all
       // same otherwise set it to [SfThumb.start].
       if (activeThumb == null) {
-        if (isDateTime &&
-            _valuesInMilliseconds.start == _valuesInMilliseconds.end) {
-          activeThumb = _valuesInMilliseconds.start ==
-                  min.millisecondsSinceEpoch.toDouble()
-              ? SfThumb.end
-              : SfThumb.start;
-        } else if (_values.start == _values.end) {
-          activeThumb = _values.start == min ? SfThumb.end : SfThumb.start;
-        }
+        _setActiveThumb();
       } else {
         _forwardTooltipAndOverlayController();
       }
@@ -824,6 +826,18 @@ abstract class RenderBaseRangeSlider extends RenderBaseSlider
           }
         }
       }
+    }
+  }
+
+  void _setActiveThumb() {
+    if (isDateTime &&
+        _valuesInMilliseconds.start == _valuesInMilliseconds.end) {
+      activeThumb =
+          _valuesInMilliseconds.start == min.millisecondsSinceEpoch.toDouble()
+              ? SfThumb.end
+              : SfThumb.start;
+    } else if (_values.start == _values.end) {
+      activeThumb = _values.start == min ? SfThumb.end : SfThumb.start;
     }
   }
 

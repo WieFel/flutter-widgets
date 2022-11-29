@@ -16,7 +16,7 @@ const double kAllDayAppointmentHeight = 20;
 /// Signature for callback that used to get and update the calendar
 /// state details.
 typedef UpdateCalendarState = void Function(
-    UpdateCalendarStateDetails _updateCalendarStateDetails);
+    UpdateCalendarStateDetails updateCalendarStateDetails);
 
 //// Extra small devices (phones, 600px and down)
 //// @media only screen and (max-width: 600px) {...}
@@ -416,6 +416,20 @@ class CalendarViewHelper {
       case CalendarView.schedule:
         return 0;
     }
+  }
+
+  /// Check the calendar view is day or not.
+  static bool isDayView(CalendarView view, int numberOfDays,
+      List<int>? nonWorkingDays, int numberOfWeeks) {
+    final int daysCount = DateTimeHelper.getViewDatesCount(
+        view, numberOfWeeks, numberOfDays, nonWorkingDays);
+    if ((view == CalendarView.day ||
+            view == CalendarView.week ||
+            view == CalendarView.workWeek) &&
+        daysCount == 1) {
+      return true;
+    }
+    return false;
   }
 
   /// Return the cell end padding based on platform of calendar widget.
@@ -1033,14 +1047,17 @@ class CalendarAppointment {
   @override
   // ignore: avoid_equals_and_hash_code_on_mutable_classes
   int get hashCode {
-    return hashValues(
+    return Object.hash(
       startTimeZone,
       endTimeZone,
       recurrenceRule,
       isAllDay = false,
       notes,
       location,
-      hashList(resourceIds),
+
+      /// Below condition is referred from text style class
+      /// https://api.flutter.dev/flutter/painting/TextStyle/hashCode.html
+      resourceIds == null ? null : Object.hashAll(resourceIds!),
       recurrenceId,
       id,
       data,
@@ -1048,7 +1065,9 @@ class CalendarAppointment {
       endTime,
       subject,
       color,
-      hashList(recurrenceExceptionDates),
+      recurrenceExceptionDates == null
+          ? null
+          : Object.hashAll(recurrenceExceptionDates!),
     );
   }
 }
@@ -1189,15 +1208,20 @@ class CalendarTimeRegion {
   @override
   // ignore: avoid_equals_and_hash_code_on_mutable_classes
   int get hashCode {
-    return hashValues(
+    return Object.hash(
         startTime,
         endTime,
         color,
         recurrenceRule,
         textStyle,
         enablePointerInteraction,
-        hashList(recurrenceExceptionDates),
-        hashList(resourceIds),
+
+        /// Below condition is referred from text style class
+        /// https://api.flutter.dev/flutter/painting/TextStyle/hashCode.html
+        recurrenceExceptionDates == null
+            ? null
+            : Object.hashAll(recurrenceExceptionDates!),
+        resourceIds == null ? null : Object.hashAll(resourceIds!),
         text,
         iconData,
         timeZone);

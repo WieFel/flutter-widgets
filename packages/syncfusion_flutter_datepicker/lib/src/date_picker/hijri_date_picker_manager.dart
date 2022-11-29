@@ -1,7 +1,7 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:syncfusion_flutter_core/core.dart';
-import 'package:syncfusion_flutter_datepicker/datepicker.dart';
+import '../../datepicker.dart';
 import 'picker_helper.dart';
 
 /// Options to customize the month view of the [SfHijriDateRangePicker].
@@ -507,7 +507,7 @@ class HijriDatePickerMonthViewSettings with Diagnosticable {
 
   @override
   int get hashCode {
-    return hashValues(
+    return Object.hash(
         dayFormat,
         firstDayOfWeek,
         viewHeaderStyle,
@@ -515,9 +515,12 @@ class HijriDatePickerMonthViewSettings with Diagnosticable {
         viewHeaderHeight,
         showWeekNumber,
         weekNumberStyle,
-        hashList(specialDates),
-        hashList(blackoutDates),
-        hashList(weekendDays));
+
+        /// Below condition is referred from text style class
+        /// https://api.flutter.dev/flutter/painting/TextStyle/hashCode.html
+        specialDates == null ? null : Object.hashAll(specialDates!),
+        blackoutDates == null ? null : Object.hashAll(blackoutDates!),
+        Object.hashAll(weekendDays));
   }
 }
 
@@ -930,7 +933,7 @@ class HijriDatePickerYearCellStyle with Diagnosticable {
 
   @override
   int get hashCode {
-    return hashValues(textStyle, todayTextStyle, disabledDatesTextStyle,
+    return Object.hash(textStyle, todayTextStyle, disabledDatesTextStyle,
         disabledDatesDecoration, cellDecoration, todayCellDecoration);
   }
 }
@@ -1785,7 +1788,7 @@ class HijriDatePickerMonthCellStyle with Diagnosticable {
 
   @override
   int get hashCode {
-    return hashList(<dynamic>[
+    return Object.hashAll(<dynamic>[
       textStyle,
       todayTextStyle,
       disabledDatesTextStyle,

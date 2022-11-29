@@ -4,9 +4,8 @@ import 'dart:ui' as dart_ui;
 
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
-import 'package:syncfusion_flutter_charts/charts.dart';
-import 'package:syncfusion_flutter_charts/src/chart/chart_series/series_renderer_properties.dart';
 
+import '../../../charts.dart';
 import '../../common/rendering_details.dart';
 import '../../common/state_properties.dart';
 import '../../common/user_interaction/tooltip.dart';
@@ -16,10 +15,10 @@ import '../axis/axis_renderer.dart';
 import '../base/chart_base.dart';
 import '../base/series_base.dart';
 import '../chart_series/series.dart';
+import '../chart_series/series_renderer_properties.dart';
 import '../common/common.dart';
 import '../common/interactive_tooltip.dart';
 import '../common/renderer.dart';
-
 import '../technical_indicators/technical_indicator.dart';
 import '../user_interaction/trackball.dart';
 import '../user_interaction/trackball_marker_setting_renderer.dart';
@@ -246,6 +245,12 @@ class CartesianStateProperties extends StateProperties {
   /// Specifies the shader for series
   Shader? shader;
 
+  /// Specifies total number of rectangle series in chart
+  int? sideBySideSeriesCount;
+
+  /// Specifies total number of rectangle indicator series in chart
+  int? sideBySideIndicatorCount;
+
   /// Method to set the painter key
   void setPainterKey(int index, String name, bool renderComplete) {
     int value = 0;
@@ -372,7 +377,6 @@ class CartesianStateProperties extends StateProperties {
     renderingDetails.widgetNeedUpdate = false;
 
     if (chartState.mounted) {
-      isRedrawByZoomPan = true;
       // ignore: invalid_use_of_protected_member
       chartState.setState(() {
         /// check the "mounted" property of this object and  to ensure the object is still in the tree.

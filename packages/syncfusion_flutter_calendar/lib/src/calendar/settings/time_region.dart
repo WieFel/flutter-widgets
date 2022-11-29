@@ -1,9 +1,10 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:syncfusion_flutter_calendar/calendar.dart';
 import 'package:syncfusion_flutter_datepicker/datepicker.dart'
     show IterableDiagnostics;
+
+import '../../../calendar.dart';
 
 /// It is used to highlight time slots on day, week, work week
 /// and timeline views based on start and end time and
@@ -597,15 +598,20 @@ class TimeRegion with Diagnosticable {
 
   @override
   int get hashCode {
-    return hashValues(
+    return Object.hash(
         startTime,
         endTime,
         color,
         recurrenceRule,
         textStyle,
         enablePointerInteraction,
-        hashList(recurrenceExceptionDates),
-        hashList(resourceIds),
+
+        /// Below condition is referred from text style class
+        /// https://api.flutter.dev/flutter/painting/TextStyle/hashCode.html
+        recurrenceExceptionDates == null
+            ? null
+            : Object.hashAll(recurrenceExceptionDates!),
+        resourceIds == null ? null : Object.hashAll(resourceIds!),
         text,
         iconData,
         timeZone);

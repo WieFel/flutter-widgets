@@ -8,7 +8,7 @@ import 'utility_helper.dart';
 /// Returns the DefaultLineSizeChangedArgs used by the
 /// [onDefaultLineSizeChanged] event.
 typedef DefaultLineSizeChangedCallback = void Function(
-    DefaultLineSizeChangedArgs _defaultLineSizeChangedArgs);
+    DefaultLineSizeChangedArgs defaultLineSizeChangedArgs);
 
 /// Returns the LineCountChangedArgs used by the
 /// [onLineCountChanged][onHeaderLineCountChanged][onFooderLineCountChanged]
@@ -17,15 +17,14 @@ typedef LineCountChangedCallback = void Function();
 
 /// Returns the HiddenRangeChangedArgs used by the [onLineHiddenChanged] event.
 typedef LineHiddenChangedCallback = void Function(
-    HiddenRangeChangedArgs _hiddenRangeChangedArgs);
+    HiddenRangeChangedArgs hiddenRangeChangedArgs);
 
 /// Returns the LinesInsertedArgs used by the [onLinesInserted] event.
 typedef LinesInsertedCallback = void Function(
-    LinesInsertedArgs _linesInsertedArgs);
+    LinesInsertedArgs linesInsertedArgs);
 
 /// Returns the LinesRemovedArgs used by the [onLinesRemoved] event.
-typedef LinesRemovedCallback = void Function(
-    LinesRemovedArgs _linesRemovedArgs);
+typedef LinesRemovedCallback = void Function(LinesRemovedArgs linesRemovedArgs);
 
 /// Returns the RangeChangedArgs used by the [onLineSizeChanged] event.
 typedef LineSizeChangedCallback = void Function(
@@ -681,7 +680,7 @@ class LineSizeCollection extends PaddedEditableLineSizeHostBase
       for (final RangeValuePair<bool> entry in _lineHidden.rangeValues) {
         final bool entryValue = entry.value as bool;
         if (entryValue) {
-          setRange(entry.start, entry.end, 0.0);
+          _distances!.setRange(entry.start, entry.end, 0.0);
         }
       }
     }
@@ -706,11 +705,10 @@ class LineSizeCollection extends PaddedEditableLineSizeHostBase
   @override
   void insertLines(
       int insertAtLine, int count, EditableLineSizeHostBase? moveLines) {
-    final LineSizeCollection? _moveLines =
+    final LineSizeCollection? moveLine =
         moveLines != null ? moveLines as LineSizeCollection : null;
-    _lineSizes.insertWithThreeArgs(insertAtLine, count, _moveLines?._lineSizes);
-    _lineHidden.insertWithThreeArgs(
-        insertAtLine, count, _moveLines?._lineHidden);
+    _lineSizes.insertWithThreeArgs(insertAtLine, count, moveLine?._lineSizes);
+    _lineHidden.insertWithThreeArgs(insertAtLine, count, moveLine?._lineHidden);
     _lineNested = <int, LineSizeCollection>{};
 
     _lineNested.forEach((int key, LineSizeCollection value) {
@@ -721,9 +719,9 @@ class LineSizeCollection extends PaddedEditableLineSizeHostBase
       }
     });
 
-    if (_moveLines != null) {
-      for (int i = 0; i < _moveLines._lineNested.length; i++) {
-        _moveLines._lineNested.forEach((int key, LineSizeCollection value) {
+    if (moveLine != null) {
+      for (int i = 0; i < moveLine._lineNested.length; i++) {
+        moveLine._lineNested.forEach((int key, LineSizeCollection value) {
           _lineNested.putIfAbsent(key + insertAtLine, () => value);
         });
       }
@@ -797,11 +795,12 @@ class LineSizeCollection extends PaddedEditableLineSizeHostBase
   @override
   void removeLines(
       int removeAtLine, int count, EditableLineSizeHostBase? moveLines) {
-    final LineSizeCollection? _moveLines =
+    final LineSizeCollection? removeLines =
         moveLines != null ? moveLines as LineSizeCollection : null;
-    _lineSizes.removeWithThreeArgs(removeAtLine, count, _moveLines?._lineSizes);
+    _lineSizes.removeWithThreeArgs(
+        removeAtLine, count, removeLines?._lineSizes);
     _lineHidden.removeWithThreeArgs(
-        removeAtLine, count, _moveLines?._lineHidden);
+        removeAtLine, count, removeLines?._lineHidden);
 
     final Map<int, LineSizeCollection> lineNested = _lineNested;
     _lineNested = <int, LineSizeCollection>{};
@@ -811,8 +810,9 @@ class LineSizeCollection extends PaddedEditableLineSizeHostBase
         if (key >= removeAtLine) {
           if (key >= removeAtLine + count) {
             _lineNested.putIfAbsent(key - count, () => value);
-          } else if (_moveLines != null) {
-            _moveLines._lineNested.putIfAbsent(key - removeAtLine, () => value);
+          } else if (removeLines != null) {
+            removeLines._lineNested
+                .putIfAbsent(key - removeAtLine, () => value);
           }
         } else {
           _lineNested.putIfAbsent(key, () => value);
@@ -891,7 +891,7 @@ class LineSizeCollection extends PaddedEditableLineSizeHostBase
   /// the lines. If set to true hide the lines.
   @override
   void setHidden(int from, int to, bool hide) {
-    _lineHidden.setRange(from, to - from + 1, hide);
+    _lineHidden.setRange(from, to - from + 1, hide, false);
 
     if (isSuspendUpdates) {
       return;
@@ -1076,7 +1076,7 @@ class DistancesUtil {
       final bool hide = hiddenLine[0] as bool;
       repeatSizeCount = hiddenLine[1] as int;
 
-      void _setRange() {
+      void setRange() {
         final int rangeTo = getRangeToHelper(n, to, repeatSizeCount);
         if (hide) {
           distances.setRange(n, rangeTo, 0.0);
@@ -1089,12 +1089,12 @@ class DistancesUtil {
 
       if (ndh is NestedDistancesHostBase) {
         if (ndh.getDistances(n) == null) {
-          _setRange();
+          setRange();
         } else {
           distances.setNestedDistances(n, hide ? null : ndh.getDistances(n));
         }
       } else {
-        _setRange();
+        setRange();
       }
     }
   }
@@ -1110,7 +1110,7 @@ class DistancesUtil {
     final Object ndh = linesHost;
 
     for (int n = from; n <= to; n++) {
-      void _setRange() {
+      void setRange() {
         int repeatSizeCount = -1;
         final List<dynamic> lineSize = linesHost.getSize(n, repeatSizeCount);
         final double size = lineSize[0] as double;
@@ -1122,12 +1122,12 @@ class DistancesUtil {
 
       if (ndh is NestedDistancesHostBase) {
         if (ndh.getDistances(n) == null) {
-          _setRange();
+          setRange();
         } else {
           distances.setNestedDistances(n, ndh.getDistances(n));
         }
       } else {
-        _setRange();
+        setRange();
       }
     }
   }

@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:convert';
 import 'dart:math';
+// ignore: unnecessary_import
 import 'dart:typed_data' show Uint8List;
 import 'dart:ui';
 
@@ -13,7 +14,7 @@ import 'package:flutter/scheduler.dart' show SchedulerBinding;
 import 'package:flutter/services.dart';
 import 'package:syncfusion_flutter_core/legend_internal.dart';
 import 'package:syncfusion_flutter_core/theme.dart';
-import 'package:syncfusion_flutter_maps/maps.dart';
+import '../../maps.dart';
 
 import '../common.dart';
 import '../controller/map_controller.dart';
@@ -863,11 +864,7 @@ class _ShapeBounds {
   num? maxLongitude;
   num? maxLatitude;
 
-  _ShapeBounds get empty => _ShapeBounds(
-      minLongitude: null,
-      minLatitude: null,
-      maxLongitude: null,
-      maxLatitude: null);
+  _ShapeBounds get empty => _ShapeBounds();
 }
 
 class _ShapeFileData {
@@ -1649,6 +1646,39 @@ class _GeoJSONLayerState extends State<GeoJSONLayer>
     });
   }
 
+  void _needPathCenterAndWidthCalculation(Map<String, MapModel> mapDataSource) {
+    List<Offset> pixelPoints;
+    List<dynamic> rawPoints;
+    int rawPointsLength, pointsLength;
+    mapDataSource.forEach((String key, MapModel mapModel) {
+      double signedArea = 0.0, centerX = 0.0, centerY = 0.0;
+      rawPointsLength = mapModel.rawPoints.length;
+      for (int j = 0; j < rawPointsLength; j++) {
+        rawPoints = mapModel.rawPoints[j];
+        pointsLength = rawPoints.length;
+        pixelPoints = mapModel.pixelPoints![j];
+        for (int k = 0; k < pointsLength; k++) {
+          if (k > 0) {
+            final int l = k - 1;
+            if (widget.showDataLabels && l + 1 < pixelPoints.length) {
+              // Used mathematical formula to find
+              // the center of polygon points.
+              final double x0 = pixelPoints[l].dx, y0 = pixelPoints[l].dy;
+              final double x1 = pixelPoints[l + 1].dx,
+                  y1 = pixelPoints[l + 1].dy;
+              signedArea += (x0 * y1) - (y0 * x1);
+              centerX += (x0 + x1) * (x0 * y1 - x1 * y0);
+              centerY += (y0 + y1) * (x0 * y1 - x1 * y0);
+            }
+          }
+        }
+      }
+      if (widget.showDataLabels) {
+        findPathCenterAndWidth(signedArea, centerX, centerY, mapModel);
+      }
+    });
+  }
+
   void _obtainDataSource() {
     _computeDataSource = _obtainDataSourceAndBindDataSource()
         .then((_ShapeFileData data) => data);
@@ -1742,6 +1772,18 @@ class _GeoJSONLayerState extends State<GeoJSONLayer>
 
     if (_controller != null && _shouldUpdateMapDataSource && !isSublayer) {
       _controller!.visibleFocalLatLng = null;
+    }
+
+    if (oldWidget.showDataLabels != widget.showDataLabels &&
+        widget.showDataLabels) {
+      if (shapeFileData.mapDataSource.values.first.shapePathCenter == null ||
+          shapeFileData.mapDataSource.values.first.shapeWidth == null) {
+        _needPathCenterAndWidthCalculation(shapeFileData.mapDataSource);
+        dataLabelAnimationController.value = 0.0;
+        if (mounted) {
+          dataLabelAnimationController.forward(from: 0);
+        }
+      }
     }
 
     _obtainDataSource();
@@ -2055,7 +2097,7 @@ class _RenderGeoJSONLayer extends RenderStack
       _refresh();
       markNeedsPaint();
       SchedulerBinding.instance
-          ?.addPostFrameCallback(_initiateInitialAnimations);
+          .addPostFrameCallback(_initiateInitialAnimations);
     }
   }
 
@@ -2488,56 +2530,12 @@ class _RenderGeoJSONLayer extends RenderStack
       }
 
       mapModel.shapePath = shapePath;
-      _findPathCenterAndWidth(signedArea, centerX, centerY, mapModel);
+      if (_state.widget.showDataLabels ||
+          _state.widget.source.bubbleSizeMapper != null) {
+        findPathCenterAndWidth(signedArea, centerX, centerY, mapModel);
+      }
       _updateBubbleRadiusAndPath(mapModel);
     });
-  }
-
-  void _findPathCenterAndWidth(
-      double signedArea, double centerX, double centerY, MapModel mapModel) {
-    if (_state.widget.showDataLabels ||
-        _state.widget.source.bubbleSizeMapper != null) {
-      // Used mathematical formula to find the center of polygon points.
-      signedArea /= 2;
-      centerX = centerX / (6 * signedArea);
-      centerY = centerY / (6 * signedArea);
-      mapModel.shapePathCenter = Offset(centerX, centerY);
-      double? minX, maxX;
-      double distance,
-          minDistance = double.infinity,
-          maxDistance = double.negativeInfinity;
-
-      final List<double> minDistances = <double>[double.infinity];
-      final List<double> maxDistances = <double>[double.negativeInfinity];
-      for (final List<Offset> points in mapModel.pixelPoints!) {
-        for (final Offset point in points) {
-          distance = (centerY - point.dy).abs();
-          if (point.dx < centerX) {
-            // Collected all points which is less 10 pixels distance from
-            // 'center y' to position the labels more smartly.
-            if (minX != null && distance < 10) {
-              minDistances.add(point.dx);
-            }
-            if (distance < minDistance) {
-              minX = point.dx;
-              minDistance = distance;
-            }
-          } else if (point.dx > centerX) {
-            if (maxX != null && distance < 10) {
-              maxDistances.add(point.dx);
-            }
-
-            if (distance > maxDistance) {
-              maxX = point.dx;
-              maxDistance = distance;
-            }
-          }
-        }
-      }
-
-      mapModel.shapeWidth = max(maxX!, maxDistances.reduce(max)) -
-          min(minX!, minDistances.reduce(min));
-    }
   }
 
   void _updateBubbleRadiusAndPath(MapModel mapModel) {
@@ -2762,7 +2760,7 @@ class _RenderGeoJSONLayer extends RenderStack
 
   /// Handling zooming using mouse wheel scrolling.
   void _handleScrollEvent(PointerScrollEvent event) {
-    if (_zoomPanBehavior != null && _zoomPanBehavior!.enablePinching) {
+    if (_zoomPanBehavior != null && _zoomPanBehavior!.enableMouseWheelZooming) {
       _controller.isInInteractive = true;
       _controller.gesture ??= Gesture.scale;
       if (_controller.gesture != Gesture.scale) {
@@ -2770,7 +2768,6 @@ class _RenderGeoJSONLayer extends RenderStack
       }
 
       if (_currentHoverItem != null) {
-        _previousHoverItem = _currentHoverItem;
         _currentHoverItem = null;
       }
       _downGlobalPoint ??= event.position;
@@ -2799,9 +2796,12 @@ class _RenderGeoJSONLayer extends RenderStack
       Offset? localFocalPoint,
       Offset? globalFocalPoint}) {
     final double newZoomLevel = _getZoomLevel(scale);
-    final double newShapeLayerSizeFactor = _getScale(newZoomLevel);
+    final double newShapeLayerSizeFactor =
+        _getScale(newZoomLevel) * _controller.shapeLayerSizeFactor;
     final Offset newShapeLayerOffset =
         _controller.getZoomingTranslation(origin: localFocalPoint);
+    _controller.visibleFocalLatLng = _controller.getVisibleFocalLatLng(
+        newShapeLayerOffset, newShapeLayerSizeFactor);
     final Rect newVisibleBounds = _controller.getVisibleBounds(
         newShapeLayerOffset, newShapeLayerSizeFactor);
     final MapLatLngBounds newVisibleLatLngBounds =
@@ -2988,7 +2988,6 @@ class _RenderGeoJSONLayer extends RenderStack
     }
 
     if (_currentHoverItem != null) {
-      _previousHoverItem = _currentHoverItem;
       _currentHoverItem = null;
     }
 
@@ -3413,6 +3412,7 @@ class _RenderGeoJSONLayer extends RenderStack
             _state.widget.shapeTooltipBuilder != null ||
             hasShapeHoverColor) &&
         element != MapLayerElement.bubble &&
+        mapModel.shapePath != null &&
         mapModel.shapePath!.contains(position);
   }
 
@@ -3568,7 +3568,7 @@ class _RenderGeoJSONLayer extends RenderStack
         ..addListener(_handleFocalLatLngAnimation)
         ..addStatusListener(_handleFocalLatLngAnimationStatusChange);
     }
-    SchedulerBinding.instance?.addPostFrameCallback(_initiateInitialAnimations);
+    SchedulerBinding.instance.addPostFrameCallback(_initiateInitialAnimations);
   }
 
   @override

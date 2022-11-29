@@ -1,5 +1,29 @@
 ## Unreleased
 
+## Range Slider
+
+**Bug**
+* #FB37062 - Now, the discrete RangeSlider thumbs get overlapped when placed inside a Row widget.
+
+## [20.2.36] - 07/01/2022
+
+## Slider
+
+**Features**
+* Now, the edge labels in the axis can be shifted inside the axis bounds if their position exceeds the axis bounds using the `edgeLabelPlacement` property.
+
+## Range Slider
+
+**Features**
+* Now, the edge labels in the axis can be shifted inside the axis bounds if their position exceeds the axis bounds using the `edgeLabelPlacement` property.
+
+## Range Selector
+
+**Features**
+* Now, the edge labels in the axis can be shifted inside the axis bounds if their position exceeds the axis bounds using the `edgeLabelPlacement` property.
+
+## [19.4.38] - 12/17/2021
+
 ## Slider
 
 **Features**

@@ -123,24 +123,25 @@ class SfDataGridThemeData with Diagnosticable {
     Color? columnResizeIndicatorColor,
     double? columnResizeIndicatorStrokeWidth,
     TextStyle? rowHoverTextStyle,
+    Widget? sortIcon,
   }) {
     return SfDataGridThemeData.raw(
-      brightness: brightness,
-      gridLineColor: gridLineColor,
-      gridLineStrokeWidth: gridLineStrokeWidth,
-      selectionColor: selectionColor,
-      currentCellStyle: currentCellStyle,
-      frozenPaneLineColor: frozenPaneLineColor,
-      frozenPaneLineWidth: frozenPaneLineWidth,
-      headerHoverColor: headerHoverColor,
-      sortIconColor: sortIconColor,
-      headerColor: headerColor,
-      frozenPaneElevation: frozenPaneElevation,
-      rowHoverColor: rowHoverColor,
-      columnResizeIndicatorColor: columnResizeIndicatorColor,
-      columnResizeIndicatorStrokeWidth: columnResizeIndicatorStrokeWidth,
-      rowHoverTextStyle: rowHoverTextStyle,
-    );
+        brightness: brightness,
+        gridLineColor: gridLineColor,
+        gridLineStrokeWidth: gridLineStrokeWidth,
+        selectionColor: selectionColor,
+        currentCellStyle: currentCellStyle,
+        frozenPaneLineColor: frozenPaneLineColor,
+        frozenPaneLineWidth: frozenPaneLineWidth,
+        headerHoverColor: headerHoverColor,
+        sortIconColor: sortIconColor,
+        headerColor: headerColor,
+        frozenPaneElevation: frozenPaneElevation,
+        rowHoverColor: rowHoverColor,
+        columnResizeIndicatorColor: columnResizeIndicatorColor,
+        columnResizeIndicatorStrokeWidth: columnResizeIndicatorStrokeWidth,
+        rowHoverTextStyle: rowHoverTextStyle,
+        sortIcon: sortIcon);
   }
 
   /// Create a [SfDataGridThemeData] given a set of exact values.
@@ -150,23 +151,23 @@ class SfDataGridThemeData with Diagnosticable {
   /// create intermediate themes based on two themes created with the
   /// [SfDataGridThemeData] constructor.
   ///
-  const SfDataGridThemeData.raw({
-    required this.brightness,
-    required this.gridLineColor,
-    required this.gridLineStrokeWidth,
-    required this.selectionColor,
-    required this.currentCellStyle,
-    required this.frozenPaneLineColor,
-    required this.frozenPaneLineWidth,
-    required this.sortIconColor,
-    required this.headerColor,
-    required this.headerHoverColor,
-    required this.frozenPaneElevation,
-    required this.columnResizeIndicatorColor,
-    required this.columnResizeIndicatorStrokeWidth,
-    required this.rowHoverColor,
-    required this.rowHoverTextStyle,
-  });
+  const SfDataGridThemeData.raw(
+      {required this.brightness,
+      required this.gridLineColor,
+      required this.gridLineStrokeWidth,
+      required this.selectionColor,
+      required this.currentCellStyle,
+      required this.frozenPaneLineColor,
+      required this.frozenPaneLineWidth,
+      required this.sortIconColor,
+      required this.headerColor,
+      required this.headerHoverColor,
+      required this.frozenPaneElevation,
+      required this.columnResizeIndicatorColor,
+      required this.columnResizeIndicatorStrokeWidth,
+      required this.rowHoverColor,
+      required this.rowHoverTextStyle,
+      required this.sortIcon});
 
   /// The brightness of the overall theme of the
   /// application for the [SfDataGrid] widgets.
@@ -325,6 +326,69 @@ class SfDataGridThemeData with Diagnosticable {
   /// The default [TextStyle] for the row when a pointer is hovering over it.
   final TextStyle? rowHoverTextStyle;
 
+  /// The icon to display for sort order.
+
+  ///
+
+  /// If the [Icon] type is assigned,
+  /// the animation will be automatically applied and rotated
+  /// according to sorting order.
+  ///
+  /// If you want to change the icon based on each state of the sorting,
+  /// you can use the [Builder] widget and return
+  /// the respective icon for the state.
+  /// You have to return the icons for all the three states even
+  /// if you want to change the icon for specific state.
+  ///
+  /// The below example shows how to load different icon for each state
+  /// i.e. ascending, descending and unsorted order.
+  ///
+
+  ///
+
+  /// ```dart
+  /// Widget build(BuildContext context) {
+  ///   return Scaffold(
+  ///     appBar: AppBar(title: const Text('Flutter SfDataGrid')),
+  ///     body: SfDataGridTheme(
+  ///       data: SfDataGridThemeData(
+  ///         sortIcon: Builder(
+  ///           builder: (context) {
+  ///             Widget? icon;
+  ///             String columnName = '';
+  ///             context.visitAncestorElements((element) {
+  ///               if (element is GridHeaderCellElement) {
+  ///                 columnName = element.column.columnName;
+  ///               }
+  ///               return true;
+  ///             });
+
+  ///             var column = _employeeDataSource.sortedColumns
+  ///                 .where((element) => element.name == columnName)
+  ///                 .firstOrNull;
+  ///             if (column != null) {
+  ///               if (column.sortDirection ==
+  ///                      DataGridSortDirection.ascending) {
+  ///                 icon = const Icon(Icons.arrow_circle_up_rounded,
+  ///                         size: 16);
+  ///               } else if (column.sortDirection ==
+  ///                      DataGridSortDirection.descending) {
+  ///                 icon = const Icon(Icons.arrow_circle_down_rounded,
+  ///                         size: 16);
+  ///               }
+  ///             }
+
+  ///             return icon ?? const Icon(Icons.sort_rounded, size: 16);
+  ///           },
+  ///         ),
+  ///       ),
+  ///       child: SfDataGrid(),
+  ///     ),
+  ///   );
+  /// }
+  /// ```
+  final Widget? sortIcon;
+
   /// Creates a copy of this theme but with the given
   /// fields replaced with the new values.
   SfDataGridThemeData copyWith({
@@ -343,6 +407,7 @@ class SfDataGridThemeData with Diagnosticable {
     double? columnResizeIndicatorStrokeWidth,
     Color? rowHoverColor,
     TextStyle? rowHoverTextStyle,
+    Widget? sortIcon,
   }) {
     return SfDataGridThemeData.raw(
       brightness: brightness ?? this.brightness,
@@ -362,6 +427,7 @@ class SfDataGridThemeData with Diagnosticable {
           this.columnResizeIndicatorStrokeWidth,
       rowHoverColor: rowHoverColor ?? this.rowHoverColor,
       rowHoverTextStyle: rowHoverTextStyle ?? this.rowHoverTextStyle,
+      sortIcon: sortIcon ?? this.sortIcon,
     );
   }
 
@@ -372,30 +438,31 @@ class SfDataGridThemeData with Diagnosticable {
       return null;
     }
     return SfDataGridThemeData(
-        gridLineColor: Color.lerp(a!.gridLineColor, b!.gridLineColor, t),
-        gridLineStrokeWidth:
-            lerpDouble(a.gridLineStrokeWidth, b.gridLineStrokeWidth, t),
-        selectionColor: Color.lerp(a.selectionColor, b.selectionColor, t),
-        currentCellStyle: DataGridCurrentCellStyle.lerp(
-            a.currentCellStyle, b.currentCellStyle, t),
-        frozenPaneLineColor:
-            Color.lerp(a.frozenPaneLineColor, b.frozenPaneLineColor, t),
-        frozenPaneLineWidth:
-            lerpDouble(a.frozenPaneLineWidth, b.frozenPaneLineWidth, t),
-        sortIconColor: Color.lerp(a.sortIconColor, b.sortIconColor, t),
-        headerHoverColor: Color.lerp(a.headerHoverColor, b.headerHoverColor, t),
-        headerColor: Color.lerp(a.headerColor, b.headerColor, t),
-        frozenPaneElevation:
-            lerpDouble(a.frozenPaneElevation, b.frozenPaneElevation, t),
-        rowHoverColor: Color.lerp(a.rowHoverColor, b.rowHoverColor, t),
-        columnResizeIndicatorColor: Color.lerp(
-            a.columnResizeIndicatorColor, b.columnResizeIndicatorColor, t),
-        columnResizeIndicatorStrokeWidth: lerpDouble(
-            a.columnResizeIndicatorStrokeWidth,
-            b.columnResizeIndicatorStrokeWidth,
-            t),
-        rowHoverTextStyle:
-            TextStyle.lerp(a.rowHoverTextStyle, b.rowHoverTextStyle, t));
+      gridLineColor: Color.lerp(a!.gridLineColor, b!.gridLineColor, t),
+      gridLineStrokeWidth:
+          lerpDouble(a.gridLineStrokeWidth, b.gridLineStrokeWidth, t),
+      selectionColor: Color.lerp(a.selectionColor, b.selectionColor, t),
+      currentCellStyle: DataGridCurrentCellStyle.lerp(
+          a.currentCellStyle, b.currentCellStyle, t),
+      frozenPaneLineColor:
+          Color.lerp(a.frozenPaneLineColor, b.frozenPaneLineColor, t),
+      frozenPaneLineWidth:
+          lerpDouble(a.frozenPaneLineWidth, b.frozenPaneLineWidth, t),
+      sortIconColor: Color.lerp(a.sortIconColor, b.sortIconColor, t),
+      headerHoverColor: Color.lerp(a.headerHoverColor, b.headerHoverColor, t),
+      headerColor: Color.lerp(a.headerColor, b.headerColor, t),
+      frozenPaneElevation:
+          lerpDouble(a.frozenPaneElevation, b.frozenPaneElevation, t),
+      rowHoverColor: Color.lerp(a.rowHoverColor, b.rowHoverColor, t),
+      columnResizeIndicatorColor: Color.lerp(
+          a.columnResizeIndicatorColor, b.columnResizeIndicatorColor, t),
+      columnResizeIndicatorStrokeWidth: lerpDouble(
+          a.columnResizeIndicatorStrokeWidth,
+          b.columnResizeIndicatorStrokeWidth,
+          t),
+      rowHoverTextStyle:
+          TextStyle.lerp(a.rowHoverTextStyle, b.rowHoverTextStyle, t),
+    );
   }
 
   @override
@@ -423,7 +490,8 @@ class SfDataGridThemeData with Diagnosticable {
         other.columnResizeIndicatorColor == columnResizeIndicatorColor &&
         other.columnResizeIndicatorStrokeWidth ==
             columnResizeIndicatorStrokeWidth &&
-        other.rowHoverTextStyle == rowHoverTextStyle;
+        other.rowHoverTextStyle == rowHoverTextStyle &&
+        other.sortIcon == sortIcon;
   }
 
   @override
@@ -443,8 +511,9 @@ class SfDataGridThemeData with Diagnosticable {
       columnResizeIndicatorColor,
       columnResizeIndicatorStrokeWidth,
       rowHoverTextStyle,
+      sortIcon
     ];
-    return hashList(values);
+    return Object.hashAll(values);
   }
 
   @override
@@ -522,7 +591,7 @@ class DataGridCurrentCellStyle {
       borderColor,
       borderWidth,
     ];
-    return hashList(values);
+    return Object.hashAll(values);
   }
 
   /// Linearly interpolate between two styles.

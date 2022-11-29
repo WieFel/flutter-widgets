@@ -5,6 +5,7 @@ class Worksheet {
   /// Creates an instance of Worksheet.
   Worksheet(Workbook workbook) {
     _book = workbook;
+    _isRightToLeft = workbook.isRightToLeft;
   }
 
   /// set summary row below
@@ -37,11 +38,23 @@ class Worksheet {
   /// Represent the hyperlink relation id
   final List<String> _hyperlinkRelationId = <String>[];
 
+  /// Represents the count of the number of tables
+  late int _count = 0;
+
+  ///Represents the datavalidation table
+  _DataValidationTable? _mdataValidation;
+
+  ///Represents autoFilter class
+  AutoFilterCollection? _autoFilters;
+
   /// Represents auto fit manager.
   _AutoFitManager get _autoFitManager {
     final _AutoFitManager autoFit = _AutoFitManager._withSheet(this);
     return autoFit;
   }
+
+  ///Get a collection of tables in the worksheet. Read-only.
+  ExcelTableCollection? _tableCollection;
 
   /// Sets the grid line visible.
   /// True if grid lines are visible. otherwise, False.
@@ -79,6 +92,9 @@ class Worksheet {
   /// ```
   ChartHelper? charts;
 
+  //Represent the RTL direction for worksheet
+  bool _isRightToLeft = false;
+
   /// Represents the chart count in the workbook.
   int chartCount = 0;
 
@@ -91,8 +107,17 @@ class Worksheet {
   ///Collection of all merged cells in the current worksheet.
   MergedCellCollection? _mergeCells;
 
+  /// Represents tab color of the sheet.
+  late String _tabColor;
+
+  ///Determine whether the tab color is applied on the worksheet or not.
+  bool _isTapColorApplied = false;
+
   /// Collection of all hyperlinks in the current worksheet.
   HyperlinkCollection? _hyperlinks;
+
+  /// Represents the visibility of worksheet.
+  WorksheetVisibility _visibility = WorksheetVisibility.visible;
 
   /// Represents parent workbook.
   Workbook get workbook {
@@ -115,6 +140,40 @@ class Worksheet {
     return _columns!;
   }
 
+  ///Indicates whether worksheet is displayed right to left.FALSE by default
+  ///
+  /// ```dart
+  /// Workbook workbook = Workbook();
+  /// Worksheet sheet = workbook.worksheets[0];
+  /// sheet.isRightToLeft = true;
+  /// List<int> bytes = workbook.saveAsStream();
+  /// File('ExcelRTL.xlsx').writeAsBytes(bytes);
+  /// workbook.dispose();
+  /// ```
+  // ignore: unnecessary_getters_setters
+  bool get isRightToLeft {
+    return _isRightToLeft;
+  }
+
+  set isRightToLeft(bool value) {
+    _isRightToLeft = value;
+  }
+
+  /// Represents the method to create an instance for table if it is null
+  _DataValidationTable get _dvTable {
+    if (_mdataValidation == null) {
+      _mdataValidation = _DataValidationTable(this);
+      _count++;
+    }
+
+    return _mdataValidation!;
+  }
+
+  /// Represents the getter to get the table count
+  int get _tableCount {
+    return _count;
+  }
+
   /// Returns or sets the name of the worksheet.
   ///
   /// ```dart
@@ -127,8 +186,7 @@ class Worksheet {
   /// ```
   String get name {
     if (_name == '') {
-      // ignore: prefer_interpolation_to_compose_strings
-      _name = 'Sheet' + (index).toString();
+      _name = 'Sheet$index';
     }
     return _name;
   }
@@ -182,6 +240,12 @@ class Worksheet {
     return _hyperlinks!;
   }
 
+  ///Get a collection of tables in the worksheet. Read-only.
+  ExcelTableCollection get tableCollection {
+    _tableCollection ??= ExcelTableCollection(this);
+    return _tableCollection!;
+  }
+
   /// Gets/Sets a Conditional Format collections in the worksheet.
   // ignore: library_private_types_in_public_api
   List<_ConditionalFormatsImpl> conditionalFormats =
@@ -201,6 +265,39 @@ class Worksheet {
   RowCollection get rows {
     _rows ??= RowCollection(this);
     return _rows!;
+  }
+
+  ///Get the tab color for the worksheet.
+  String get tabColor {
+    return _tabColor;
+  }
+
+  ///Set the tab color for the worksheet.
+  set tabColor(String value) {
+    _tabColor = value;
+    _isTapColorApplied = true;
+  }
+
+  // ignore: public_member_api_docs
+  AutoFilterCollection get autoFilters {
+    _autoFilters ??= AutoFilterCollection(this);
+    return _autoFilters!;
+  }
+
+  ///Get the visibility of worksheet.
+  WorksheetVisibility get visibility {
+    return _visibility;
+  }
+
+  ///Set the visibility of worksheet.
+  set visibility(WorksheetVisibility visibilty) {
+    if (_book.worksheets.innerList.length <= 1 &&
+        visibilty == WorksheetVisibility.hidden) {
+      throw Exception(
+          'A workbook must contain at least one visible worksheet.');
+    } else {
+      _visibility = visibilty;
+    }
   }
 
   /// Checks if specified cell has correct row and column index.
@@ -268,7 +365,9 @@ class Worksheet {
     } else if (cellReference.length < 2) {
       throw Exception('cellReference cannot be less then 2 symbols');
     } else if (cellReference.isEmpty) {
-      throw 'cellReference - Value cannot be empty.';
+      final Error error =
+          ArgumentError('cellReference - Value cannot be empty.');
+      throw error;
     }
     final List<String> cells = cellReference.split(':');
     int firstRow = 0;
@@ -303,7 +402,9 @@ class Worksheet {
         iLetterStart = 0;
       }
       if (cellReference.length < 2) {
-        throw 'cellReference - name cannot be less then 2 symbols.';
+        final Error error = ArgumentError(
+            'cellReference - name cannot be less then 2 symbols.');
+        throw error;
       }
 
       final String strNumber = cellReference.substring(iDigitStart);
@@ -335,20 +436,14 @@ class Worksheet {
             _SecondToken._defaultMilliSecondHalf) {
       final String decimalSeparator =
           currentCulture.numberFormat.numberDecimalSeparator;
-      // ignore: prefer_interpolation_to_compose_strings
-      final RegExp regex = RegExp('([0-9]*:[0-9]*:[0-9]*"' +
-          decimalSeparator +
-          '[0-9]*' +
-          '|[0-9]*:[0-9]*:[0-9]*|[0-9]*:[0-9]*"' +
-          decimalSeparator +
-          '[0-9]*|[0-9]*:[0-9]*)');
+      final RegExp regex = RegExp(
+          '([0-9]*:[0-9]*:[0-9]*"$decimalSeparator[0-9]*|[0-9]*:[0-9]*:[0-9]*|[0-9]*:[0-9]*"$decimalSeparator[0-9]*|[0-9]*:[0-9]*)');
       final List<RegExpMatch> matches = regex.allMatches(value).toList();
       for (final Match match in matches) {
         final String semiColon = currentCulture.dateTimeFormat.timeSeparator;
         const String valueFormat = _SecondToken._defaultFormatLong;
         final List<String> timeValues =
-            // ignore: noop_primitive_operations
-            match.pattern.toString().split(semiColon.toString());
+            match.pattern.toString().split(semiColon);
         final int minutesValue = Range._fromOADate(dNumber).minute;
         String updatedValue = timeValues[0];
         int updateMinutesValue = 0;
@@ -361,9 +456,7 @@ class Worksheet {
               updatedValue = updatedValue +
                   semiColon +
                   (timeValues[timeValues.length - 1]).replaceAll(
-                      // ignore: noop_primitive_operations
-                      timeValues[timeValues.length - 1].toString(),
-                      valueFormat);
+                      timeValues[timeValues.length - 1], valueFormat);
               value = value.replaceAll(match.pattern.toString(), updatedValue);
             }
             break;
@@ -429,7 +522,9 @@ class Worksheet {
   /// ```
   int getColumnIndex(String columnName) {
     if (columnName.isEmpty) {
-      throw 'columnName - name cannot be less then 1 symbols.';
+      final Error error =
+          ArgumentError('columnName - name cannot be less then 1 symbols.');
+      throw error;
     }
 
     int iColumn = 0;
@@ -525,9 +620,15 @@ class Worksheet {
     if (value.isNotEmpty && value[0] == '=') {
       range.setFormula(value.substring(1));
     } else {
+      double? doubleValue;
+      DateTime? dateValue;
+      if (value.runtimeType == double) {
+        doubleValue = double.tryParse(value);
+      } else {
+        dateValue = DateTime.tryParse(value);
+      }
+
       final CultureInfo cultureInfo = _book._getCultureInfo();
-      final double? doubleValue = double.tryParse(value);
-      final DateTime? dateValue = DateTime.tryParse(value);
       final bool bDateTime =
           !value.contains(cultureInfo.dateTimeFormat.dateSeparator) &&
               dateValue != null;
@@ -565,7 +666,7 @@ class Worksheet {
           range._setFormulaBooleanValue(value);
         } else if (iserrorStrings) {
           range._setFormulaErrorStringValue(value);
-        } else if (value.contains('Exception:', 0) || istext) {
+        } else if (value.contains('Exception:') || istext) {
           range.setText(value);
         } else {
           range._setFormulaStringValue(value);
@@ -587,8 +688,7 @@ class Worksheet {
     bool isNumber = true;
     if (value.contains(cultureInfo.numberFormat.numberDecimalSeparator)) {
       final RegExp decimalSepRegex =
-          // ignore: prefer_interpolation_to_compose_strings
-          RegExp('[' + cultureInfo.numberFormat.numberDecimalSeparator + ']');
+          RegExp('[${cultureInfo.numberFormat.numberDecimalSeparator}]');
       final List<RegExpMatch> decimalSepMatches =
           decimalSepRegex.allMatches(value).toList();
       //Checks whether the value has more than one decimal point.
@@ -626,8 +726,7 @@ class Worksheet {
     }
 
     final RegExp groupSepRegex =
-        // ignore: prefer_interpolation_to_compose_strings
-        RegExp('[' + cultureInfo.numberFormat.numberGroupSeparator + ']');
+        RegExp('[${cultureInfo.numberFormat.numberGroupSeparator}]');
     final List<RegExpMatch> groupSepMatches =
         groupSepRegex.allMatches(value).toList();
 
@@ -1103,10 +1202,8 @@ class Worksheet {
       if (!ignoreRotation && !isMerged && rotation > 0) {
         if (rotation == 255) {
           curSize._width = _book._convertToPixels(
-                  _autoFitManager
-                      ._calculateWrappedCell(format, strText, defWidth.toInt())
-                      // ignore: noop_primitive_operations
-                      .toDouble(),
+                  _autoFitManager._calculateWrappedCell(
+                      format, strText, defWidth.toInt()),
                   6) -
               defWidth;
         } else if (rotation != 90 && rotation != 180) {
@@ -1708,9 +1805,8 @@ class Worksheet {
           'Sheet is already protected, before use unprotect method');
     }
     if (password.length > _maxPassWordLength) {
-      // ignore: prefer_interpolation_to_compose_strings, avoid_escaping_inner_quotes
-      throw Exception('Length of the password can\'t be more than ' +
-          _maxPassWordLength.toString());
+      throw Exception(
+          "Length of the password can't be more than $_maxPassWordLength");
     }
     if (options == null) {
       options = ExcelSheetProtectionOption();
@@ -1784,7 +1880,7 @@ class Worksheet {
     if (length <= 0) {
       Exception('length');
     }
-    final List<int> result = List<int>.filled(length, 0, growable: false);
+    final List<int> result = List<int>.filled(length, 0);
     final Random rnd = Random(Range._toOADate(DateTime.now()).toInt());
     final int iMaxValue = _maxPassWordLength + 1;
 
@@ -1826,7 +1922,7 @@ class Worksheet {
 
   /// Converts character to 15 bits sequence
   static List<bool> _getCharBits15(String char) {
-    final List<bool> arrResult = List<bool>.filled(15, false, growable: false);
+    final List<bool> arrResult = List<bool>.filled(15, false);
     final int usSource = char.codeUnitAt(0);
     int curBit = 1;
     for (int i = 0; i < 15; i++) {
@@ -1844,12 +1940,10 @@ class Worksheet {
     }
 
     if (count < 0) {
-      // ignore: avoid_escaping_inner_quotes
-      throw Exception('Count can\'t be less than zero');
+      throw Exception("Count can't be less than zero");
     }
 
-    final List<bool> arrResult =
-        List<bool>.filled(bits.length, false, growable: false);
+    final List<bool> arrResult = List<bool>.filled(bits.length, false);
     // ignore: prefer_final_locals
     for (int i = 0, len = bits.length; i < len; i++) {
       final int newPos = (i + count) % len;
@@ -2226,6 +2320,16 @@ class Worksheet {
 
     if (_pictures != null) {
       _pictures!._clear();
+    }
+
+    if (_tableCollection != null) {
+      _tableCollection!._clear();
+      _tableCollection = null;
+    }
+
+    if (_mdataValidation != null) {
+      _mdataValidation!._clear();
+      _mdataValidation = null;
     }
   }
 }

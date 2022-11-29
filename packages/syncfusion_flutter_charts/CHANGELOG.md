@@ -1,5 +1,60 @@
 ## Unreleased
 
+**Bugs**
+* #FB37559 - Now, the `NoSuchMethodError` exception will not be thrown when a tooltip is activated using the `showByIndex` method in circular charts.
+* #FB37311 - The FastLineSeries renders when all the y-values are the same.
+* #FB36534 – Now, the pie series will explode immediately.
+* #FB37039 - When panning the X-axis with `zoomMode` as `ZoomMode.X`, the Y-axis range does not change.
+* #I392604, G821 - Now, the candle series width will not decrease when having the MACD indicator.
+* #I373783 - Now, the hollow candle will not throw an exception when setting the visible range.
+
+## [20.2.44] - 08/16/2022
+
+**Bugs**
+* Now, the 'size should not be infinite' assertion failed exception will not be thrown when having the SVG image as an annotation at the start and end point in the chart.
+
+## [20.2.43] - 08/08/2022
+
+**Bugs**
+* Now, the startup animation will work for circular, funnel, and pyramid charts when having the [legendItemBuilder](https://pub.dev/documentation/syncfusion_flutter_charts/latest/charts/Legend/legendItemBuilder.html) in legend.
+* Now, the tooltip will display the correct value when using the logarithmic axis.
+
+## [20.2.36] - 07/01/2022
+
+**Features**
+* Provided the support to customize the date-time axis labels based on the interval type.
+
+* Now, the scrollbar can be displayed always or on-demand when the legend [overflowMode](https://pub.dev/documentation/syncfusion_flutter_charts/latest/charts/Legend/overflowMode.html) is set to `scroll`.
+
+* Provided the support to trim the intersecting axis labels when the [labelIntersectAction](https://pub.dev/documentation/syncfusion_flutter_charts/latest/charts/ChartAxis/labelIntersectAction.html) property is set to `AxisLabelIntersectAction.trim`.
+
+## [20.1.47] - 04/04/2022
+
+**Bugs**
+* The [onAxisLabelTapped](https://pub.dev/documentation/syncfusion_flutter_charts/latest/charts/SfCartesianChart/onAxisLabelTapped.html) callback works properly with the rotated axis labels.
+
+**Features**
+* Provided support to display the trackball tooltip smartly when there is no space horizontally.
+* Now, the tooltips and the trackball tooltips can be rendered in right-to-left direction.
+* Based on the current locale, the built-in texts in legends and tooltips are automatically translated now.
+
+## [19.4.55] - 03/08/2022
+
+**Bugs**
+* Now, the border in the edges of the radial bar chart renders properly and will not get cut off.
+
+## [19.4.50] - 02/08/2022
+
+**Bugs**
+* Now, the chart will not throw exceptions while showing the chart widget based on the connection state of the FutureBuilder widget and scrolling with the SingleChildScrollView widget.
+
+## [19.4.43] - 01/18/2022
+
+**Bugs**
+* The series will not be visible after calling the setstate when its visibility is set to false.
+
+## [19.4.38] - 12/17/2021
+
 **Features**
 * Implemented multilevel axis labels support in Cartesian charts to categorize the axis labels.
 * Improved the date-time axis label’s default format to display additional detail about the date.

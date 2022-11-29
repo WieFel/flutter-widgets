@@ -21,6 +21,7 @@ import 'renderer_extension.dart';
 ///
 /// {@youtube 560 315 https://www.youtube.com/watch?v=VJxPp7-2nGk}
 @immutable
+// ignore: must_be_immutable
 class DoughnutSeries<T, D> extends CircularSeries<T, D> {
   /// Creating an argument constructor of DoughnutSeries class.
   DoughnutSeries(
@@ -226,6 +227,6 @@ class DoughnutSeries<T, D> extends CircularSeries<T, D> {
       xValueMapper,
       yValueMapper
     ];
-    return hashList(values);
+    return Object.hashAll(values);
   }
 }

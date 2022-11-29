@@ -160,6 +160,162 @@ abstract class SfLocalizations {
   /// Label that is displayed the rowsPerPages of datapager.
   String get rowsPerPageDataPagerLabel;
 
+  /// The label that is displayed in the filter view in SfDataGrid for
+  /// `Equals` option in drop down widget.
+  String get equalsDataGridFilteringLabel;
+
+  /// The label that is displayed in the filter view in SfDataGrid for
+  /// `Does Not Equal` option in drop down widget.
+  String get doesNotEqualDataGridFilteringLabel;
+
+  /// The label that is displayed in the filter view in SfDataGrid for
+  /// `Begins With` option in drop down widget.
+  String get beginsWithDataGridFilteringLabel;
+
+  /// The label that is displayed in the filter view in SfDataGrid for
+  /// `Ends With` option in drop down widget.
+  String get endsWithDataGridFilteringLabel;
+
+  /// The label that is displayed in the filter view in SfDataGrid for
+  /// `Does Not Begin With` option in drop down widget.
+  String get doesNotBeginWithDataGridFilteringLabel;
+
+  /// The label that is displayed in the filter view in SfDataGrid for
+  /// `Does Not End With` option in drop down widget.
+  String get doesNotEndWithDataGridFilteringLabel;
+
+  /// The label that is displayed in the filter view in SfDataGrid for
+  /// `Contains` option in drop down widget.
+  String get containsDataGridFilteringLabel;
+
+  /// The label that is displayed in the filter view in SfDataGrid for
+  /// `Does Not Contain` option in drop down widget.
+  String get doesNotContainDataGridFilteringLabel;
+
+  /// The label that is displayed in the filter view in SfDataGrid for
+  /// `Empty` option in drop down widget.
+  String get emptyDataGridFilteringLabel;
+
+  /// The label that is displayed in the filter view in SfDataGrid for
+  /// `Not Empty` option in drop down widget.
+  String get notEmptyDataGridFilteringLabel;
+
+  /// The label that is displayed in the filter view in SfDataGrid for
+  /// `Null` option in drop down widget.
+  String get nullDataGridFilteringLabel;
+
+  /// The label that is displayed in the filter view in SfDataGrid for
+  /// `Not Null` option in drop down widget.
+  String get notNullDataGridFilteringLabel;
+
+  /// The label that is displayed in the filter view in SfDataGrid for
+  /// `Before` option in drop down widget.
+  String get beforeDataGridFilteringLabel;
+
+  /// The label that is displayed in the filter view in SfDataGrid for
+  /// `Before Or Equal` option in drop down widget.
+  String get beforeOrEqualDataGridFilteringLabel;
+
+  /// The label that is displayed in the filter view in SfDataGrid for
+  /// `After` option in drop down widget.
+  String get afterDataGridFilteringLabel;
+
+  /// The label that is displayed in the filter view in SfDataGrid for
+  /// `After Or Equal` option in drop down widget.
+  String get afterOrEqualDataGridFilteringLabel;
+
+  /// The label that is displayed in the filter view in SfDataGrid for
+  /// `Less Than` option in drop down widget.
+  String get lessThanDataGridFilteringLabel;
+
+  /// The label that is displayed in the filter view in SfDataGrid for
+  /// `Less Than Or Equal` option in drop down widget.
+  String get lessThanOrEqualDataGridFilteringLabel;
+
+  /// The label that is displayed in the filter view in SfDataGrid for
+  /// `Greater Than` option in drop down widget.
+  String get greaterThanDataGridFilteringLabel;
+
+  /// The label that is displayed in the filter view in SfDataGrid for
+  /// `Greater Than Or Equal` option in drop down widget.
+  String get greaterThanOrEqualDataGridFilteringLabel;
+
+  /// The label that is displayed in the filter view in SfDataGrid for
+  /// `Sort Smallest to Largest` option in drop down widget.
+  String get sortSmallestToLargestDataGridFilteringLabel;
+
+  /// The label that is displayed in the filter view in SfDataGrid for
+  /// ` Sort Largest to Smallest ` option in drop down widget.
+  String get sortLargestToSmallestDataGridFilteringLabel;
+
+  /// The label that is displayed in the filter view in SfDataGrid for
+  /// `Sort A to Z` option in drop down widget.
+  String get sortAToZDataGridFilteringLabel;
+
+  /// The label that is displayed in the filter view in SfDataGrid for
+  /// `Sort Z to A` option in drop down widget.
+  String get sortZToADataGridFilteringLabel;
+
+  /// The label that is displayed in the filter view in SfDataGrid for
+  /// `Sort Oldest to Newest` option in drop down widget.
+  String get sortOldestToNewestDataGridFilteringLabel;
+
+  /// The label that is displayed in the filter view in SfDataGrid for
+  /// `Sort Newest to Oldest` option in drop down widget.
+  String get sortNewestToOldestDataGridFilteringLabel;
+
+  /// The label that is displayed in the filter view in SfDataGrid for
+  /// `Clear Filter From` option in drop down widget.
+  String get clearFilterFromDataGridFilteringLabel;
+
+  /// The label that is displayed in the filter view in SfDataGrid for
+  /// `Text Filters` option in drop down widget.
+  String get textFiltersDataGridFilteringLabel;
+
+  /// The label that is displayed in the filter view in SfDataGrid for
+  /// `Number Filters` option in drop down widget.
+  String get numberFiltersDataGridFilteringLabel;
+
+  /// The label that is displayed in the filter view in SfDataGrid for
+  /// `Date Filters` option in drop down widget.
+  String get dateFiltersDataGridFilteringLabel;
+
+  /// The label that is displayed in the filter view in SfDataGrid for
+  /// `Search` option in drop down widget.
+  String get searchDataGridFilteringLabel;
+
+  /// The label that is displayed in the filter view in SfDataGrid for
+  /// `No matches` option in drop down widget.
+  String get noMatchesDataGridFilteringLabel;
+
+  /// The label that is displayed in the filter view in SfDataGrid for
+  /// `OK ` option in drop down widget.
+  String get okDataGridFilteringLabel;
+
+  /// The label that is displayed in the filter view in SfDataGrid for
+  /// `Cancel` option in drop down widget.
+  String get cancelDataGridFilteringLabel;
+
+  /// The label that is displayed in the filter view in SfDataGrid for
+  /// `Show rows where` option in drop down widget.
+  String get showRowsWhereDataGridFilteringLabel;
+
+  /// The label that is displayed in the filter view in SfDataGrid for
+  /// `And` option in drop down widget.
+  String get andDataGridFilteringLabel;
+
+  /// The label that is displayed in the filter view in SfDataGrid for
+  /// `Or` option in drop down widget.
+  String get orDataGridFilteringLabel;
+
+  /// The label that is displayed in the filter view in SfDataGrid for
+  /// `Select All` option in drop down widget.
+  String get selectAllDataGridFilteringLabel;
+
+  /// The label that is displayed in the filter view in SfDataGrid for
+  /// `Sort and Filter` option in drop down widget.
+  String get sortAndFilterDataGridFilteringLabel;
+
   /// Label that is displayed in the bookmark view header of PdfViewer.
   String get pdfBookmarksLabel;
 
@@ -192,6 +348,20 @@ abstract class SfLocalizations {
   /// the CANCEL confirmation button.
   String get pdfPaginationDialogCancelLabel;
 
+  /// Label that is displayed in the hyperlink dialog header of PdfViewer.
+  String get pdfHyperlinkLabel;
+
+  /// Label that is displayed in the url of the hyperlink.
+  String get pdfHyperlinkContentLabel;
+
+  /// Label that is displayed in the hyperlink dialog of PdfViewer to represent
+  /// the OPEN confirmation button.
+  String get pdfHyperlinkDialogOpenLabel;
+
+  /// Label that is displayed in the hyperlink dialog of PdfViewer to represent
+  /// the CANCEL confirmation button.
+  String get pdfHyperlinkDialogCancelLabel;
+
   /// Label that is displayed in the header of password dialog in PdfViewer
   String get passwordDialogHeaderTextLabel;
 
@@ -213,6 +383,11 @@ abstract class SfLocalizations {
   /// Label that is displayed in the password dialog of PdfViewer to represent
   /// the CANCEL confirmation button.
   String get pdfPasswordDialogCancelLabel;
+
+  /// The label is displayed as the text for the legend in the cartesian chart.
+  /// When the name of the series is not specified, then this label with the
+  /// series count is displayed as a legend.
+  String get series;
 
   /// A [LocalizationsDelegate] that uses [_DefaultLocalizations.load]
   /// to create an instance of this class.
@@ -401,6 +576,128 @@ class _DefaultLocalizations implements SfLocalizations {
   String get rowsPerPageDataPagerLabel => 'Rows per page';
 
   @override
+  String get afterDataGridFilteringLabel => 'After';
+
+  @override
+  String get afterOrEqualDataGridFilteringLabel => 'After Or Equal';
+
+  @override
+  String get beforeDataGridFilteringLabel => 'Before';
+
+  @override
+  String get beforeOrEqualDataGridFilteringLabel => 'Before Or Equal';
+
+  @override
+  String get beginsWithDataGridFilteringLabel => 'Begins With';
+
+  @override
+  String get containsDataGridFilteringLabel => 'Contains';
+
+  @override
+  String get doesNotBeginWithDataGridFilteringLabel => 'Does Not Begin With';
+
+  @override
+  String get doesNotContainDataGridFilteringLabel => 'Does Not Contain';
+
+  @override
+  String get doesNotEndWithDataGridFilteringLabel => 'Does Not End With';
+
+  @override
+  String get doesNotEqualDataGridFilteringLabel => 'Does Not Equal';
+
+  @override
+  String get emptyDataGridFilteringLabel => 'Empty';
+
+  @override
+  String get endsWithDataGridFilteringLabel => 'Ends With';
+
+  @override
+  String get equalsDataGridFilteringLabel => 'Equals';
+
+  @override
+  String get greaterThanDataGridFilteringLabel => 'Greater Than';
+
+  @override
+  String get greaterThanOrEqualDataGridFilteringLabel =>
+      'Greater Than Or Equal';
+
+  @override
+  String get lessThanDataGridFilteringLabel => 'Less Than';
+
+  @override
+  String get lessThanOrEqualDataGridFilteringLabel => 'Less Than Or Equal';
+
+  @override
+  String get notEmptyDataGridFilteringLabel => 'Not Empty';
+
+  @override
+  String get notNullDataGridFilteringLabel => 'Not Null';
+
+  @override
+  String get nullDataGridFilteringLabel => 'Null';
+
+  @override
+  String get sortSmallestToLargestDataGridFilteringLabel =>
+      'Sort Smallest to Largest';
+
+  @override
+  String get sortLargestToSmallestDataGridFilteringLabel =>
+      'Sort Largest to Smallest';
+
+  @override
+  String get sortAToZDataGridFilteringLabel => 'Sort A to Z';
+
+  @override
+  String get sortZToADataGridFilteringLabel => 'Sort Z to A';
+
+  @override
+  String get sortOldestToNewestDataGridFilteringLabel =>
+      'Sort Oldest to Newest';
+
+  @override
+  String get sortNewestToOldestDataGridFilteringLabel =>
+      'Sort Newest to Oldest';
+
+  @override
+  String get clearFilterFromDataGridFilteringLabel => 'Clear Filter From';
+
+  @override
+  String get textFiltersDataGridFilteringLabel => 'Text Filters';
+
+  @override
+  String get numberFiltersDataGridFilteringLabel => 'Number Filters';
+
+  @override
+  String get dateFiltersDataGridFilteringLabel => 'Date Filters';
+
+  @override
+  String get searchDataGridFilteringLabel => 'Search';
+
+  @override
+  String get noMatchesDataGridFilteringLabel => 'No matches';
+
+  @override
+  String get okDataGridFilteringLabel => 'OK';
+
+  @override
+  String get cancelDataGridFilteringLabel => 'Cancel';
+
+  @override
+  String get showRowsWhereDataGridFilteringLabel => 'Show rows where';
+
+  @override
+  String get andDataGridFilteringLabel => 'And';
+
+  @override
+  String get orDataGridFilteringLabel => 'Or';
+
+  @override
+  String get selectAllDataGridFilteringLabel => 'Select All';
+
+  @override
+  String get sortAndFilterDataGridFilteringLabel => 'Sort and Filter';
+
+  @override
   String get pdfBookmarksLabel => 'Bookmarks';
 
   @override
@@ -425,6 +722,18 @@ class _DefaultLocalizations implements SfLocalizations {
   String get pdfPaginationDialogCancelLabel => 'CANCEL';
 
   @override
+  String get pdfHyperlinkLabel => 'Open Web Page';
+
+  @override
+  String get pdfHyperlinkContentLabel => 'Do you want to open the page at';
+
+  @override
+  String get pdfHyperlinkDialogOpenLabel => 'OPEN';
+
+  @override
+  String get pdfHyperlinkDialogCancelLabel => 'CANCEL';
+
+  @override
   String get passwordDialogHeaderTextLabel => 'Password Protected';
 
   @override
@@ -442,6 +751,9 @@ class _DefaultLocalizations implements SfLocalizations {
 
   @override
   String get pdfPasswordDialogCancelLabel => 'CANCEL';
+
+  @override
+  String get series => 'Series';
 
   static Future<SfLocalizations> load(Locale locale) {
     return SynchronousFuture<SfLocalizations>(const _DefaultLocalizations());

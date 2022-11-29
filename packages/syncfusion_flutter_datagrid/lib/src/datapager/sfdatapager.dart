@@ -1,3 +1,5 @@
+// ignore_for_file: avoid_setters_without_getters, avoid_redundant_argument_values
+
 import 'package:collection/collection.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
@@ -381,19 +383,19 @@ class SfDataPager extends StatefulWidget {
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
-    properties.add(IntProperty('visibleItemsCount', visibleItemsCount,
-        defaultValue: 5, showName: true));
     properties.add(
-        DoubleProperty('pageCount', pageCount, showName: true, ifNull: 'null'));
-    properties.add(IntProperty('initialPageIndex', initialPageIndex,
-        defaultValue: 0.0, showName: true));
+        IntProperty('visibleItemsCount', visibleItemsCount, defaultValue: 5));
+    properties.add(DoubleProperty('pageCount', pageCount, ifNull: 'null'));
+    properties.add(
+        IntProperty('initialPageIndex', initialPageIndex, defaultValue: 0.0));
     properties.add(DiagnosticsProperty<Axis>('direction', direction,
-        defaultValue: Axis.horizontal, showName: true));
+        defaultValue: Axis.horizontal));
     properties.add(ObjectFlagProperty<DataPagerDelegate>('delegate', delegate,
         showName: true, ifNull: 'null'));
     properties.add(ObjectFlagProperty<DataPagerController>(
         'controller', controller,
         showName: true, ifNull: 'null'));
+    // ignore: strict_raw_type
     properties.add(ObjectFlagProperty<DataPagerItemBuilderCallback>(
         'pageItemBuilder', pageItemBuilder,
         showName: true, ifNull: 'null'));
@@ -435,6 +437,14 @@ class SfDataPagerState extends State<SfDataPager> {
   bool _isOrientationChanged = false;
   bool _isPregenerateItems = false;
   bool _isDesktop = false;
+
+  // Checks whether the `SfDataPager` is loading initially or not.
+  // This flag is used to restrict calling the handlePageChange twice
+  // at the initial loading
+  bool _isInitialLoading = true;
+
+  // Checks whether the `Rows Per Page` is changed or not.
+  bool _isRowsPerPageChanged = false;
 
   int? _rowsPerPage;
 
@@ -494,22 +504,7 @@ class SfDataPagerState extends State<SfDataPager> {
     _controller = widget.controller ?? DataPagerController()
       ..addListener(_handleDataPagerControlPropertyChanged);
     _addDelegateListener();
-    _onInitialDataPagerLoaded();
   }
-
-  void _onInitialDataPagerLoaded() {
-    WidgetsBinding.instance?.addPostFrameCallback((_) {
-      if (widget.initialPageIndex > 0) {
-        _handleDataPagerControlPropertyChanged(property: 'initialPageIndex');
-      } else {
-        _currentPageIndex = widget.initialPageIndex;
-        _controller!._selectedPageIndex = _currentPageIndex;
-        _handlePageItemTapped(_currentPageIndex);
-      }
-    });
-  }
-
-  // Delegate
 
   void _addDelegateListener() {
     final Object delegate = widget.delegate;
@@ -534,8 +529,41 @@ class SfDataPagerState extends State<SfDataPager> {
   }
 
   void _handleDataPagerDelegatePropertyChanged() {
-    if (!_suspendDataPagerUpdate) {
+    // Issue:
+    // FLUT-6628 - `handlePageChange` method is called twice on initial loading
+    //
+    // Fix:
+    // We called the `handlePageChange` method twice in _addDelegateListener and `_onInitialDataPagerLoaded` methods.
+    // In the `_addDelegateListener` method with `_currentPageIndex` index 0 by default.
+    // In `_onInitialDataPagerLoaded` method, we called with `initialPageIndex` set in the API.
+    // Now, we have called both in the `_addDelegateListener` method.
+    // Hence, we removed the _onInitialDataPagerLoaded method.
+    // Also, introduced  the flag _isInitialLoading to restrict unwanted calling.
+    if (!_suspendDataPagerUpdate && _isInitialLoading) {
+      _isInitialLoading = false;
+      if (widget.initialPageIndex > 0) {
+        final int index = _resolveToItemIndex(widget.initialPageIndex);
+        _handlePageItemTapped(index);
+        WidgetsBinding.instance.addPostFrameCallback((Duration timeStamp) {
+          final double distance = _getCumulativeSize(index);
+          _scrollTo(distance, canUpdate: true);
+          _setCurrentPageIndex(index);
+        });
+      } else {
+        _handlePageItemTapped(_currentPageIndex);
+      }
+    } else if (!_suspendDataPagerUpdate && _isRowsPerPageChanged) {
+      _isRowsPerPageChanged = false;
       _handlePageItemTapped(_currentPageIndex);
+      WidgetsBinding.instance.addPostFrameCallback((Duration timeStamp) {
+        final double distance = _getCumulativeSize(_currentPageIndex);
+        _scrollTo(distance, canUpdate: true);
+        _setCurrentPageIndex(_currentPageIndex);
+      });
+    } else if (!_suspendDataPagerUpdate) {
+      _handlePageItemTapped(_currentPageIndex);
+    } else {
+      return;
     }
   }
 
@@ -548,7 +576,18 @@ class SfDataPagerState extends State<SfDataPager> {
   }
 
   Future<void> _handlePageItemTapped(int index) async {
+    // Issue:
+    // FLUT-6759 - `handlePageChange` method is called infinite times when switch between pages so fast
+    //
+    // Fix:
+    // If the user changes the page so fast before the fetch data from API, it calls infinite times.
+    // We didn't wait in `_handlePageItemTapped` until the `handlePageChange` method completed.
+    // Now, we have called the _handlePageChange method again after completing the first process.
+    if (_suspendDataPagerUpdate) {
+      return;
+    }
     _suspendDataPagerUpdate = true;
+
     if (index > widget.pageCount - 1) {
       index -= 1;
     }
@@ -631,13 +670,10 @@ class SfDataPagerState extends State<SfDataPager> {
         }
 
         final int index = _resolveToItemIndex(widget.initialPageIndex);
-        final bool canChangePage = await _canChangePage(index);
-        if (canChangePage) {
-          final double distance = _getCumulativeSize(index);
-          await _scrollTo(distance, canUpdate: true);
-          _setCurrentPageIndex(index);
-        }
-        _raisePageNavigationEnd(canChangePage ? index : _currentPageIndex);
+        final double distance = _getCumulativeSize(index);
+        await _scrollTo(distance, canUpdate: true);
+        _setCurrentPageIndex(index);
+        _raisePageNavigationEnd(index);
         break;
       case 'pageCount':
         _currentPageIndex = 0;
@@ -649,6 +685,7 @@ class SfDataPagerState extends State<SfDataPager> {
         if (selectedPageIndex < 0 ||
             selectedPageIndex > _lastPageIndex ||
             selectedPageIndex == _currentPageIndex) {
+          _suspendDataPagerUpdate = false;
           return;
         }
         final bool canChangePage = await _canChangePage(selectedPageIndex);
@@ -1010,7 +1047,7 @@ class SfDataPagerState extends State<SfDataPager> {
       double? height,
       double? width,
       EdgeInsetsGeometry? padding}) {
-    final ThemeData _flutterTheme = Theme.of(context);
+    final ThemeData flutterTheme = Theme.of(context);
     Widget? pagerItem;
     Key? pagerItemKey;
     Color itemColor = _dataPagerThemeHelper!.itemColor;
@@ -1022,7 +1059,7 @@ class SfDataPagerState extends State<SfDataPager> {
       pagerItem = widget.pageItemBuilder!(type ?? element!.index.toString());
     }
 
-    void _setBorder() {
+    void setBorder() {
       border = _dataPagerThemeHelper!.itemBorderWidth != null &&
               _dataPagerThemeHelper!.itemBorderWidth! > 0.0
           ? Border.all(
@@ -1060,9 +1097,34 @@ class SfDataPagerState extends State<SfDataPager> {
         );
         pagerItemKey = element.key;
       }
+    } else {
+      // Issue:
+      //
+      // FLUT-6687-The next and previous buttons are enabled even though
+      // the current page is the last and the first page respectively.
+      //
+      // Fix:
+      //
+      // We have applied the disabled and selected Items Color based on the visible and selected properties.
+      // But, we only update this bool properties when the pagerItem is null.
+      // So, the visible property is true by default hence the disabled color is not applied.
+      // Also, the selected item Color is applied only when the pagerItem is null.
+      // Now, we are updating those properties even though the pagerItem is not null.
+
+      if (element == null) {
+        visible = !_isNavigatorItemVisible(type!);
+        itemColor = visible
+            ? _dataPagerThemeHelper!.itemColor
+            : _dataPagerThemeHelper!.disabledItemColor;
+      } else {
+        final bool isSelected = _checkIsSelectedIndex(element.index);
+        itemColor = isSelected
+            ? _dataPagerThemeHelper!.selectedItemColor
+            : _dataPagerThemeHelper!.itemColor;
+      }
     }
 
-    _setBorder();
+    setBorder();
 
     return SizedBox(
       key: pagerItemKey,
@@ -1089,11 +1151,11 @@ class SfDataPagerState extends State<SfDataPager> {
                   ? MaterialStateMouseCursor.clickable
                   : SystemMouseCursors.basic,
               splashColor:
-                  visible ? _flutterTheme.splashColor : Colors.transparent,
+                  visible ? flutterTheme.splashColor : Colors.transparent,
               hoverColor:
-                  visible ? _flutterTheme.hoverColor : Colors.transparent,
+                  visible ? flutterTheme.hoverColor : Colors.transparent,
               highlightColor:
-                  visible ? _flutterTheme.highlightColor : Colors.transparent,
+                  visible ? flutterTheme.highlightColor : Colors.transparent,
               onTap: () {
                 if (element != null) {
                   if (element.index == _currentPageIndex) {
@@ -1109,10 +1171,7 @@ class SfDataPagerState extends State<SfDataPager> {
                       property: type!.toLowerCase());
                 }
               },
-              child: Align(
-                  key: pagerItemKey,
-                  alignment: Alignment.center,
-                  child: pagerItem),
+              child: Align(key: pagerItemKey, child: pagerItem),
             ),
           ),
         ),
@@ -1175,7 +1234,7 @@ class SfDataPagerState extends State<SfDataPager> {
   // dropdown
   Widget? _buildDropDownWidget() {
     if (widget.onRowsPerPageChanged != null) {
-      final List<Widget> _availableRowsPerPage =
+      final List<Widget> availableRowsPerPage =
           widget.availableRowsPerPage.map<DropdownMenuItem<int>>((int? value) {
         return DropdownMenuItem<int>(
             value: value,
@@ -1190,18 +1249,22 @@ class SfDataPagerState extends State<SfDataPager> {
         child: Container(
           width: _dropdownSize.width,
           height: _dropdownSize.height,
-          padding: const EdgeInsets.fromLTRB(16, 8, 12, 8),
+          padding: !_isRTL
+              ? const EdgeInsets.fromLTRB(16, 8, 7, 8)
+              : const EdgeInsets.fromLTRB(7, 8, 16, 8),
           decoration: BoxDecoration(
               borderRadius: BorderRadius.circular(3.0),
               border: Border.all(
                   color: _dataPagerThemeHelper!.dropdownButtonBorderColor)),
           child: DropdownButtonHideUnderline(
             child: DropdownButton<int>(
+              focusColor: Colors.transparent,
               itemHeight: 48,
-              items: _availableRowsPerPage.cast<DropdownMenuItem<int>>(),
+              items: availableRowsPerPage.cast<DropdownMenuItem<int>>(),
               value: _rowsPerPage,
               iconSize: 22.0,
               onChanged: (int? value) {
+                _isRowsPerPageChanged = true;
                 _rowsPerPage = value;
                 widget.onRowsPerPageChanged!(_rowsPerPage);
               },
@@ -1210,6 +1273,7 @@ class SfDataPagerState extends State<SfDataPager> {
         ),
       );
     }
+    return null;
   }
 
   // Footer
@@ -1266,7 +1330,7 @@ class SfDataPagerState extends State<SfDataPager> {
 
   // Body
   Widget _buildBody(BoxConstraints constraint) {
-    final int _oldPageCount = _pageCount;
+    final int oldPageCount = _pageCount;
     _pageCount = widget.pageCount.toInt();
 
     final double buttonSize =
@@ -1297,7 +1361,7 @@ class SfDataPagerState extends State<SfDataPager> {
     // After we scrolled some distance on previous orientation.
     // Issue: https://github.com/flutter/flutter/issues/60288
     // Need to remove once it fixed
-    _resetScrollOffset(preScrollViewPortSize, _oldPageCount);
+    _resetScrollOffset(preScrollViewPortSize, oldPageCount);
 
     if (!_isPregenerateItems) {
       _preGenerateItem(_scrollViewPortSize);
@@ -1350,18 +1414,17 @@ class SfDataPagerState extends State<SfDataPager> {
     );
   }
 
-  void _resetScrollOffset(
-      double previousScrollViewPortSize, int _oldPageCount) {
+  void _resetScrollOffset(double previousScrollViewPortSize, int oldPageCount) {
     if (_isPregenerateItems &&
         _scrollController!.hasClients &&
         _scrollController!.offset > 0.0 &&
         ((_isOrientationChanged &&
                 _scrollViewPortSize > previousScrollViewPortSize) ||
-            _oldPageCount != _pageCount)) {
-      WidgetsBinding.instance?.addPostFrameCallback((_) {
+            oldPageCount != _pageCount)) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
         _handleScrollPositionChanged();
-        if (_oldPageCount != _pageCount) {
-          if (_currentPageIndex > _pageCount - 1) {
+        if (oldPageCount != _pageCount) {
+          if (_currentPageIndex >= _pageCount - 1) {
             _canChangePage(_pageCount - 1);
           } else {
             _canChangePage(0);
@@ -1404,7 +1467,7 @@ class SfDataPagerState extends State<SfDataPager> {
   List<Widget>? _buildRowsPerPageLabel() {
     final List<Widget> children = <Widget>[];
 
-    final Widget _dropDown = _buildDropDownWidget()!;
+    final Widget dropDown = _buildDropDownWidget()!;
     children.add(Container(
       width: _rowsPerPageLabelWidth,
       padding: __rowsPerPageLabelPadding,
@@ -1413,7 +1476,7 @@ class SfDataPagerState extends State<SfDataPager> {
           style: _dataPagerThemeHelper!.itemTextStyle,
           textAlign: _isRTL ? TextAlign.right : TextAlign.left),
     ));
-    children.add(_dropDown);
+    children.add(dropDown);
 
     return children;
   }
@@ -1421,12 +1484,12 @@ class SfDataPagerState extends State<SfDataPager> {
   // DataPager with Label builders
   Widget _buildDataPagerLabel() {
     final int index = _resolveToItemIndexInView(_currentPageIndex);
-    final String _labelInfo =
+    final String labelInfo =
         '$index ${_localization.ofDataPagerLabel} $_pageCount '
         '${_localization.pagesDataPagerLabel}';
 
     final Text label = Text(
-      _labelInfo,
+      labelInfo,
       textDirection: _textDirection,
       style: TextStyle(
           fontSize: _dataPagerThemeHelper!.itemTextStyle.fontSize,
@@ -1447,13 +1510,13 @@ class SfDataPagerState extends State<SfDataPager> {
 
   void _buildDataPagerWithLabel(
       BoxConstraints constraint, List<Widget> children) {
-    Widget? _dataPagerLabel;
+    Widget? dataPagerLabel;
 
     final bool canEnablePagerLabel = _canEnableDataPagerLabel(constraint);
-    final Widget? _dropDown = _buildDropDownWidget();
+    final Widget? dropDown = _buildDropDownWidget();
 
-    double _getRowsPerPageLabelWidth() {
-      if (_dropDown != null) {
+    double getRowsPerPageLabelWidth() {
+      if (dropDown != null) {
         return _rowsPerPageLabelWidth + _dropdownSize.width + 32;
       } else {
         return _defaultPagerLabelDimension.width;
@@ -1461,26 +1524,26 @@ class SfDataPagerState extends State<SfDataPager> {
     }
 
     // DataPager
-    final BoxConstraints _dataPagerConstraint = BoxConstraints(
+    final BoxConstraints dataPagerConstraint = BoxConstraints(
         maxWidth: canEnablePagerLabel
-            ? _getTotalDataPagerWidth(constraint) - _getRowsPerPageLabelWidth()
+            ? _getTotalDataPagerWidth(constraint) - getRowsPerPageLabelWidth()
             : _getTotalDataPagerWidth(constraint),
         maxHeight: _getTotalDataPagerHeight(constraint));
 
-    final Widget _pager = _buildDataPager(_dataPagerConstraint);
+    final Widget pager = _buildDataPager(dataPagerConstraint);
 
     //DataPagerLabel
     if (canEnablePagerLabel &&
-        _dataPagerConstraint.maxWidth >= _kMobileViewWidthOnWeb) {
-      _dataPagerLabel = _buildDataPagerLabel();
+        dataPagerConstraint.maxWidth >= _kMobileViewWidthOnWeb) {
+      dataPagerLabel = _buildDataPagerLabel();
     }
-    bool _isDropDown = false;
-    if (_dropDown != null) {
-      _isDropDown = true;
+    bool isDropDown = false;
+    if (dropDown != null) {
+      isDropDown = true;
     }
-    final Widget _dataPager = SizedBox(
-        width: _dataPagerConstraint.maxWidth,
-        height: _dataPagerConstraint.maxHeight,
+    final Widget dataPager = SizedBox(
+        width: dataPagerConstraint.maxWidth,
+        height: dataPagerConstraint.maxHeight,
         child: Align(
             alignment: _isRTL
                 ? canEnablePagerLabel
@@ -1492,23 +1555,23 @@ class SfDataPagerState extends State<SfDataPager> {
             child: SizedBox(
                 width: _getDataPagerWidth(
                     canEnableDataPagerLable: canEnablePagerLabel,
-                    isDropDown: _isDropDown),
+                    isDropDown: isDropDown),
                 height: _getDataPagerHeight(),
-                child: _dataPagerLabel != null && _isDropDown
+                child: dataPagerLabel != null && isDropDown
                     ? Row(
-                        children: <Widget>[_pager, _dataPagerLabel],
+                        children: <Widget>[pager, dataPagerLabel],
                       )
-                    : _pager)));
+                    : pager)));
 
-    children.add(_dataPager);
+    children.add(dataPager);
 
-    if (_isDropDown) {
+    if (isDropDown) {
       children.add(Row(
         children: _buildRowsPerPageLabel()!,
       ));
     }
-    if ((canEnablePagerLabel && _dataPagerLabel != null) && !_isDropDown) {
-      children.add(_dataPagerLabel);
+    if ((canEnablePagerLabel && dataPagerLabel != null) && !isDropDown) {
+      children.add(dataPagerLabel);
     }
   }
 
@@ -1608,19 +1671,19 @@ class SfDataPagerState extends State<SfDataPager> {
                       child: _getChildrenBasedOnDirection(children)),
                 );
         } else {
-          final Widget _dataPager = _buildDataPager(constraint);
+          final Widget dataPager = _buildDataPager(constraint);
           _isDirty = false;
           if (widget.onRowsPerPageChanged != null &&
               widget.direction == Axis.horizontal) {
             return SingleChildScrollView(
               scrollDirection: widget.direction,
-              child: _dataPager,
+              child: dataPager,
             );
           } else {
             return SizedBox(
                 width: _getDataPagerWidth(),
                 height: _getDataPagerHeight(),
-                child: _dataPager);
+                child: dataPager);
           }
         }
       }),
@@ -1676,9 +1739,9 @@ class _DataPagerItemGenerator {
     }
 
     for (int index = startIndex; index <= endIndex; index++) {
-      _ScrollableDataPagerItem? _scrollableElement = indexer(index);
+      _ScrollableDataPagerItem? scrollableElement = indexer(index);
 
-      if (_scrollableElement == null) {
+      if (scrollableElement == null) {
         final _ScrollableDataPagerItem? reUseScrollableElement =
             _items.firstWhereOrNull((_ScrollableDataPagerItem element) =>
                 element.index == -1 || !element.isEnsured);
@@ -1686,10 +1749,10 @@ class _DataPagerItemGenerator {
         updateScrollableItem(reUseScrollableElement, index);
       }
 
-      _scrollableElement ??= indexer(index);
+      scrollableElement ??= indexer(index);
 
-      if (_scrollableElement != null) {
-        _scrollableElement
+      if (scrollableElement != null) {
+        scrollableElement
           ..isEnsured = true
           ..visibility = true;
       } else {
