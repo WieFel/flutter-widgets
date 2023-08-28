@@ -1,8 +1,21 @@
 # Fork of Syncfusion Flutter Widgets
-This if a fork of the repository from Syncfusion. This fork was necessary in order to do some adaptations/resolve some issues that we had with the package.
+This if a fork of the repository from Syncfusion. This fork was necessary to make some adaptations/resolve some issues that we had with the package.
 The changes are concerning the package `syncfusion_flutter_charts` of this mono-repo.
 
-The production version of the packge is on the branch `lynus/prod`.
+The production version of the packge is on the branch `lynus/prod` (other branches like `lynus/dev` were just used for debugging and for putting some meaningful mock data).
+
+## Changed files
+The following files have been edited:
+- `syncfusion_flutter_charts/lib/src/chart/user_interaction/trackball.dart`
+- `syncfusion_flutter_charts/lib/src/chart/user_interaction/trackball_template.dart`
+
+## Reasons for edit
+### trackball.dart
+This file contains the the trackball (the moving ball shown while tapping+holding+dragging over the chart). Here, a property `includeYAxisExceedingPoints` (defaults to `false`) was added, which defines whether y-points that are not within the visible area should be shown in the trackball tooltip or not. We want to hide unvisible points from the tooltip.
+
+### trackball_template.dart
+This file contains the tooltip window that is shown while dragging the trackball over the chart. The problem here is that, by default, the tooltip window is just not visible if it doesn't fit on the left/right of the trackball, which is unacceptable for us. It has to be visible in any case, also if it is small.
+So the changes that have been done in this file are checking whether the tooltip should be shown on the left or right of the trackball (i.e. checking where we have more space) and giving the tooltip window a variable width, based on the available width. Like this, the tooltip is always visible and grows/shrinks depending on the available width, up to a certain max width/down to a certain minimum width.
 
 ⬇️ Below you see the original readme of the project ⬇️
 
