@@ -1153,8 +1153,6 @@ class TrackballRenderingDetails {
   bool _fitsHorizontally(Rect seriesBounds, double xPos) {
     final Rect heightIndependentBounds =
         Rect.fromLTRB(seriesBounds.left, 0, seriesBounds.right, 1);
-    print(heightIndependentBounds.contains(Offset(xPos, 0)));
-    print(trackballBehavior.includeYAxisExceedingPoints);
     return heightIndependentBounds.contains(Offset(xPos, 0));
   }
 
